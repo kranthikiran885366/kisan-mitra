@@ -1,0 +1,99 @@
+{
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफलता",
+    "save": "सेव करें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "view": "देखें",
+    "search": "खोजें",
+    "filter": "फ़िल्टर",
+    "refresh": "रीफ्रेश",
+    "back": "वापस",
+    "next": "अगला",
+    "previous": "पिछला",
+    "close": "बंद करें"
+  },
+  "auth": {
+    "login": "लॉगिन",
+    "register": "रजिस्टर",
+    "logout": "लॉगआउट",
+    "email": "ईमेल",
+    "phone": "फोन नंबर",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "name": "पूरा नाम",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "dontHaveAccount": "खाता नहीं है?",
+    "alreadyHaveAccount": "पहले से खाता है?",
+    "signIn": "साइन इन करें",
+    "signUp": "साइन अप करें",
+    "createAccount": "खाता बनाएं"
+  },
+  "navigation": {
+    "dashboard": "डैशबोर्ड",
+    "weather": "मौसम",
+    "crops": "फसलें",
+    "market": "बाजार",
+    "schemes": "योजनाएं",
+    "settings": "सेटिंग्स",
+    "profile": "प्रोफाइल"
+  },
+  "dashboard": {
+    "welcome": "वापस स्वागत है",
+    "quickStats": "त्वरित आंकड़े",
+    "recentActivity": "हाल की गतिविधि",
+    "weatherWidget": "आज का मौसम",
+    "marketPrices": "बाजार की कीमतें",
+    "notifications": "सूचनाएं",
+    "quickActions": "त्वरित कार्य"
+  },
+  "weather": {
+    "currentWeather": "वर्तमान मौसम",
+    "forecast": "5-दिन का पूर्वानुमान",
+    "temperature": "तापमान",
+    "humidity": "नमी",
+    "windSpeed": "हवा की गति",
+    "rainfall": "बारिश",
+    "alerts": "मौसम चेतावनी",
+    "farmingAdvice": "कृषि सलाह"
+  },
+  "crops": {
+    "recommendations": "फसल सुझाव",
+    "seasonal": "मौसमी गाइड",
+    "diseases": "रोग पहचान",
+    "calendar": "कृषि कैलेंडर",
+    "suitableFor": "उपयुक्त है",
+    "expectedYield": "अपेक्षित उत्पादन",
+    "sowingTime": "बुआई का समय",
+    "harvestTime": "कटाई का समय"
+  },
+  "market": {
+    "currentPrices": "वर्तमान कीमतें",
+    "priceHistory": "मूल्य इतिहास",
+    "trends": "बाजार रुझान",
+    "analysis": "बाजार विश्लेषण",
+    "nearbyMarkets": "आस-पास के बाजार",
+    "priceAlerts": "मूल्य अलर्ट"
+  },
+  "schemes": {
+    "availableSchemes": "उपलब्ध योजनाएं",
+    "eligibility": "पात्रता",
+    "benefits": "लाभ",
+    "applicationProcess": "आवेदन प्रक्रिया",
+    "deadline": "अंतिम तिथि",
+    "documents": "आवश्यक दस्तावेज",
+    "applyNow": "अभी आवेदन करें"
+  },
+  "settings": {
+    "profile": "प्रोफाइल सेटिंग्स",
+    "preferences": "प्राथमिकताएं",
+    "notifications": "सूचनाएं",
+    "language": "भाषा",
+    "voice": "आवाज सेटिंग्स",
+    "privacy": "गोपनीयता",
+    "about": "के बारे में"
+  }
+}

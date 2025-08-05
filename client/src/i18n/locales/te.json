@@ -1,0 +1,99 @@
+{
+  "common": {
+    "loading": "లోడ్ అవుతోంది...",
+    "error": "లోపం",
+    "success": "విజయం",
+    "save": "సేవ్ చేయండి",
+    "cancel": "రద్దు చేయండి",
+    "delete": "తొలగించండి",
+    "edit": "సవరించండి",
+    "view": "చూడండి",
+    "search": "వెతకండి",
+    "filter": "ఫిల్టర్",
+    "refresh": "రిఫ్రెష్",
+    "back": "వెనుకకు",
+    "next": "తదుపరి",
+    "previous": "మునుపటి",
+    "close": "మూసివేయండి"
+  },
+  "auth": {
+    "login": "లాగిన్",
+    "register": "రిజిస్టర్",
+    "logout": "లాగ్అవుట్",
+    "email": "ఇమెయిల్",
+    "phone": "ఫోన్ నంబర్",
+    "password": "పాస్‌వర్డ్",
+    "confirmPassword": "పాస్‌వర్డ్‌ను నిర్ధారించండి",
+    "name": "పూర్తి పేరు",
+    "forgotPassword": "పాస్‌వర్డ్ మర్చిపోయారా?",
+    "dontHaveAccount": "ఖాతా లేదా?",
+    "alreadyHaveAccount": "ఇప్పటికే ఖాతా ఉందా?",
+    "signIn": "సైన్ ఇన్ చేయండి",
+    "signUp": "సైన్ అప్ చేయండి",
+    "createAccount": "ఖాతా సృష్టించండి"
+  },
+  "navigation": {
+    "dashboard": "డ్యాష్‌బోర్డ్",
+    "weather": "వాతావరణం",
+    "crops": "పంటలు",
+    "market": "మార్కెట్",
+    "schemes": "పథకాలు",
+    "settings": "సెట్టింగ్‌లు",
+    "profile": "ప్రొఫైల్"
+  },
+  "dashboard": {
+    "welcome": "తిరిగి స్వాగతం",
+    "quickStats": "త్వరిత గణాంకాలు",
+    "recentActivity": "ఇటీవలి కార్యకలాపాలు",
+    "weatherWidget": "నేటి వాతావరణం",
+    "marketPrices": "మార్కెట్ ధరలు",
+    "notifications": "నోటిఫికేషన్లు",
+    "quickActions": "త్వరిత చర్యలు"
+  },
+  "weather": {
+    "currentWeather": "ప్రస్తుత వాతావరణం",
+    "forecast": "5-రోజుల అంచనా",
+    "temperature": "ఉష్ణోగ్రత",
+    "humidity": "తేమ",
+    "windSpeed": "గాలి వేగం",
+    "rainfall": "వర్షపాతం",
+    "alerts": "వాతావరణ హెచ్చరికలు",
+    "farmingAdvice": "వ్యవసాయ సలహా"
+  },
+  "crops": {
+    "recommendations": "పంట సూచనలు",
+    "seasonal": "కాలానుగుణ గైడ్",
+    "diseases": "వ్యాధి గుర్తింపు",
+    "calendar": "వ్యవసాయ క్యాలెండర్",
+    "suitableFor": "అనుకూలం",
+    "expectedYield": "ఆశించిన దిగుబడి",
+    "sowingTime": "విత్తన సమయం",
+    "harvestTime": "కోత సమయం"
+  },
+  "market": {
+    "currentPrices": "ప్రస్తుత ధరలు",
+    "priceHistory": "ధర చరిత్ర",
+    "trends": "మార్కెట్ ట్రెండ్‌లు",
+    "analysis": "మార్కెట్ విశ్లేషణ",
+    "nearbyMarkets": "సమీప మార్కెట్లు",
+    "priceAlerts": "ధర అలర్ట్‌లు"
+  },
+  "schemes": {
+    "availableSchemes": "అందుబాటులో ఉన్న పథకాలు",
+    "eligibility": "అర్హత",
+    "benefits": "ప్రయోజనాలు",
+    "applicationProcess": "దరఖాస్తు ప్రక్రియ",
+    "deadline": "గడువు",
+    "documents": "అవసరమైన పత్రాలు",
+    "applyNow": "ఇప్పుడే దరఖాస్తు చేయండి"
+  },
+  "settings": {
+    "profile": "ప్రొఫైల్ సెట్టింగ్‌లు",
+    "preferences": "ప్రాధాన్యతలు",
+    "notifications": "నోటిఫికేషన్లు",
+    "language": "భాష",
+    "voice": "వాయిస్ సెట్టింగ్‌లు",
+    "privacy": "గోప్యత",
+    "about": "గురించి"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "phone": "Phone Number",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "forgotPassword": "Forgot Password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "createAccount": "Create Account"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "weather": "Weather",
+    "crops": "Crops",
+    "market": "Market",
+    "schemes": "Schemes",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "quickStats": "Quick Stats",
+    "recentActivity": "Recent Activity",
+    "weatherWidget": "Weather Today",
+    "marketPrices": "Market Prices",
+    "notifications": "Notifications",
+    "quickActions": "Quick Actions"
+  },
+  "weather": {
+    "currentWeather": "Current Weather",
+    "forecast": "5-Day Forecast",
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "windSpeed": "Wind Speed",
+    "rainfall": "Rainfall",
+    "alerts": "Weather Alerts",
+    "farmingAdvice": "Farming Advice"
+  },
+  "crops": {
+    "recommendations": "Crop Recommendations",
+    "seasonal": "Seasonal Guide",
+    "diseases": "Disease Detection",
+    "calendar": "Farming Calendar",
+    "suitableFor": "Suitable for",
+    "expectedYield": "Expected Yield",
+    "sowingTime": "Sowing Time",
+    "harvestTime": "Harvest Time"
+  },
+  "market": {
+    "currentPrices": "Current Prices",
+    "priceHistory": "Price History",
+    "trends": "Market Trends",
+    "analysis": "Market Analysis",
+    "nearbyMarkets": "Nearby Markets",
+    "priceAlerts": "Price Alerts"
+  },
+  "schemes": {
+    "availableSchemes": "Available Schemes",
+    "eligibility": "Eligibility",
+    "benefits": "Benefits",
+    "applicationProcess": "Application Process",
+    "deadline": "Deadline",
+    "documents": "Required Documents",
+    "applyNow": "Apply Now"
+  },
+  "settings": {
+    "profile": "Profile Settings",
+    "preferences": "Preferences",
+    "notifications": "Notifications",
+    "language": "Language",
+    "voice": "Voice Settings",
+    "privacy": "Privacy",
+    "about": "About"
+  }
+}
