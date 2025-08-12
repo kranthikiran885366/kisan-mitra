@@ -27,7 +27,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { useRouter } from "next/navigation"
 import { marketApi, MarketPrice, MarketAnalysis, NearbyMarket, PriceAlert } from "@/lib/marketApi"
-import { usePageSpeech } from "@/hooks/use-speech"
+import VoiceAssistant from "@/components/voice-assistant"
 
 const translations = {
   en: {
@@ -94,7 +94,7 @@ const translations = {
     sortBy: "क्रमबद्ध करें",
     backToDashboard: "डैशबोर्ड पर वापस",
     loading: "लोड हो रहा है...",
-    error: "डेटा लोड करने में त्रुटि",
+    error: "डेटा लोड करने ��ें त्रुटि",
     retry: "पुनः प्रयास करें",
     refresh: "रिफ्रेश करें",
     priceAnalysis: "मूल्य विश्लेषण",
@@ -118,14 +118,14 @@ const translations = {
     medium: "मध्यम",
     low: "कम",
     stable: "स्थिर",
-    increasing: "बढ��� रहा",
+    increasing: "बढ़ रहा",
     decreasing: "घट रहा",
     days: "दिन",
     km: "किमी",
     quintal: "क्विंटल",
   },
   te: {
-    title: "మార్కెట్ రేట్లు",
+    title: "మ��ర్కెట్ రేట్లు",
     speakSummary: "సారాంశం వినండి",
     getMarketSummary: (crops: number, markets: number, avgPrice: number) =>
       `మార్కెట్ సారాంశం: ${markets} మార్కెట్లలో ${crops} పంటలు అందుబాటులో ఉన్నాయి సగటు ధర క్వింటల్‌కు ${avgPrice} రూపాయలు`,
@@ -166,7 +166,7 @@ const translations = {
     low: "తక్కువ",
     stable: "స్థిరమైన",
     increasing: "పెరుగుతున్న",
-    decreasing: "��గ్గుతున్న",
+    decreasing: "తగ్గుతున్న",
     days: "రోజులు",
     km: "కిమీ",
     quintal: "క్వింటల్",
@@ -190,7 +190,6 @@ export default function MarketPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
-  const { speakPageContent, isPlaying, isSupported } = usePageSpeech()
 
   const t = translations[language]
 
@@ -244,14 +243,12 @@ export default function MarketPage() {
     }
   }
 
-  const speakMarketSummary = () => {
-    if (!stats) return
+  const getMarketContent = () => {
+    if (!stats) return t.title
 
-    const summaryText = t.getMarketSummary
+    return t.getMarketSummary
       ? t.getMarketSummary(stats.totalCrops, stats.totalMarkets, stats.avgPrice)
       : `Market summary: ${stats.totalCrops} crops available in ${stats.totalMarkets} markets with average price of ${stats.avgPrice} rupees per quintal`
-
-    speakPageContent(summaryText, language)
   }
 
   const filteredPrices = prices.filter(price => 
@@ -323,17 +320,13 @@ export default function MarketPage() {
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               {t.refresh}
             </Button>
-            {isSupported && (
-              <Button
-                variant="outline"
-                onClick={speakMarketSummary}
-                className={`flex items-center gap-2 ${isPlaying ? 'animate-pulse bg-blue-50' : ''}`}
-                disabled={!stats}
-              >
-                {isPlaying ? <Volume2 className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                {t.speakSummary || 'Speak Summary'}
-              </Button>
-            )}
+            <VoiceAssistant
+              content={getMarketContent()}
+              language={language}
+              translations={{
+                speak: t.speakSummary || 'Speak Summary'
+              }}
+            />
             <Button
               variant="outline"
               onClick={() => router.push('/dashboard')}
