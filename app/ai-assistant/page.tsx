@@ -23,10 +23,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useRouter } from "next/navigation"
 import { assistantApi, Message, Conversation } from "@/lib/assistantApi"
+import { usePageSpeech } from "@/hooks/use-speech"
 
 const translations = {
   en: {
     title: "AI Farming Assistant",
+    speakMessage: "Speak Message",
     welcomeMessage: "Hello! I'm your AI farming assistant. How can I help you today?",
     placeholder: "Ask me anything about farming...",
     send: "Send",
@@ -47,7 +49,7 @@ const translations = {
     processing: "Processing...",
   },
   hi: {
-    title: "कृत्रिम बुद्धिमान कृषि सहायक",
+    title: "कृत्रिम बु���्धिमान कृषि सहायक",
     welcomeMessage: "नमस्ते! मैं आपका कृषि सहायक हूं। आज मैं आपकी कैसे मदद कर सकता हूं?",
     placeholder: "खेती के बारे में कुछ भी पूछें...",
     send: "भेजें",
@@ -68,7 +70,7 @@ const translations = {
     processing: "प्रसंस्करण...",
   },
   te: {
-    title: "కృత్రిమ మేధస్సు వ్యవసాయ సహాయకుడు",
+    title: "కృత్���ిమ మేధస్సు వ్యవసాయ సహాయకుడు",
     welcomeMessage: "నమస్కారం! నేను మీ వ్యవసాయ సహాయకుడను. ఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?",
     placeholder: "వ్యవసాయం గురించి ఏదైనా అడగండి...",
     send: "పంపండి",
@@ -84,7 +86,7 @@ const translations = {
     feedback: "ఇది సహాయకరంగా ఉందా?",
     deleteChat: "చాట్ తొలగించండి",
     error: "ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
-    noHistory: "ఇంకా చాట్ చరిత్ర లేదు",
+    noHistory: "ఇంక��� చాట్ చరిత్ర లేదు",
     listening: "వింటున్నాను...",
     processing: "ప్రాసెసింగ్...",
   },
@@ -93,6 +95,7 @@ const translations = {
 export default function AIAssistantPage() {
   const router = useRouter()
   const [language, setLanguage] = useState<'en' | 'hi' | 'te'>('en')
+  const { speakPageContent, isPlaying, isSupported } = usePageSpeech()
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -110,6 +113,10 @@ export default function AIAssistantPage() {
   const synthRef = useRef<SpeechSynthesis | null>(null)
 
   const t = translations[language]
+
+  const speakMessage = (messageText: string) => {
+    speakPageContent(messageText, language)
+  }
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem('language') as 'en' | 'hi' | 'te'
