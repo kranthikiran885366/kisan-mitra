@@ -12,14 +12,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
-import { 
-  Bot, 
-  Send, 
-  Mic, 
-  Volume2, 
-  VolumeX, 
-  ArrowRight, 
-  Loader2, 
+import {
+  Bot,
+  Send,
+  Mic,
+  Volume2,
+  VolumeX,
+  ArrowRight,
+  Loader2,
   User,
   ThumbsUp,
   ThumbsDown,
@@ -71,7 +71,8 @@ import {
   Edit,
   Save,
   ArrowLeft,
-  ExternalLink
+  ExternalLink,
+  Bell
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { assistantApi, Message, Conversation } from "@/lib/assistantApi"
@@ -230,7 +231,7 @@ const translations = {
     textToSpeech: "టెక్స్ట్ టు స్పీచ్",
     feedback: "ఇది సహాయకరంగా ఉందా?",
     deleteChat: "చాట్ తొలగించండి",
-    error: "ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+    error: "ఏదో తప్పు జరిగింది. ద��చేసి మళ్లీ ప్రయత్నించండి.",
     noHistory: "ఇంకా చాట్ చరిత్ర లేదు",
     listening: "వింటున్నాను...",
     processing: "ప్రాసెసింగ్...",
@@ -350,10 +351,10 @@ const getSmartSuggestions = (context: string, language: string) => {
       weather: [
         "इस मौसम में कौन सी फसल लगानी चाहिए?",
         "बारिश से मेरी फसल पर क्या प्रभाव पड़ेगा?",
-        "क्या मुझे मौसम के कारण कटाई में देरी करनी चाहिए?"
+        "क्या मुझे मौस��� के कारण कटाई में देरी करनी चाहिए?"
       ],
       disease: [
-        "भविष्य में इस बीमारी को कैसे रोका जा सकता है?",
+        "भविष्य में इस बीमारी को कैसे र���का जा सकता है?",
         "क्या कोई जैविक उपचार उपलब्ध है?",
         "शुरुआती चेतावनी के संकेत क्या हैं?"
       ],
@@ -910,7 +911,7 @@ export default function EnhancedAIAssistantPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="en">🇺🇸 EN</SelectItem>
-                <SelectItem value="hi">🇮🇳 हिं</SelectItem>
+                <SelectItem value="hi">🇮🇳 ह���ं</SelectItem>
                 <SelectItem value="te">🇮🇳 తె</SelectItem>
               </SelectContent>
             </Select>
