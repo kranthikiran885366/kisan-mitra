@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
+import VoiceAssistant from "@/components/voice-assistant"
 
 const translations = {
   en: {
@@ -54,7 +55,7 @@ const translations = {
     title: "किसान मित्र",
     subtitle: "AI-संचालित स्मार्ट कृषि सहायक",
     description:
-      "AI-संचालित फसल रोग निदान, वास्तविक समय मौसम, बाजार दरें, व्हाट्सएप किसान समूह और विशेषज्ञ कृषि मार��गदर्शन प्राप्त करें",
+      "AI-संचालित फसल रोग निदान, वास्तविक समय मौसम, बाजार दरें, व्हाट्सएप किसान समूह और विशेषज्ञ कृषि मार्गदर्शन प्राप्त करें",
     heroSubtext: "टिकाऊ और लाभदायक कृषि के लिए अत्याधुनिक तकनीक से किसानों को सशक्त बनाना",
     features: {
       weather: "मौसम अपडेट",
@@ -111,14 +112,8 @@ export default function HomePage() {
   const [isPlaying, setIsPlaying] = useState(false)
   const t = translations[language]
 
-  const speakText = (text: string) => {
-    if ("speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(text)
-      utterance.lang = language === "en" ? "en-US" : language === "hi" ? "hi-IN" : "te-IN"
-      speechSynthesis.speak(utterance)
-      setIsPlaying(true)
-      utterance.onend = () => setIsPlaying(false)
-    }
+  const getPageContent = () => {
+    return `${t.title}. ${t.subtitle}. ${t.description}. ${t.heroSubtext}`
   }
 
   const features = [
@@ -263,14 +258,12 @@ export default function HomePage() {
           </motion.select>
 
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Button
-              variant="outline"
+            <VoiceAssistant
+              content={getPageContent()}
+              language={language}
               size="icon"
-              onClick={() => speakText(t.description)}
-              className={`${isPlaying ? "animate-pulse bg-green-100" : ""} backdrop-blur-sm`}
-            >
-              <Mic className="h-4 w-4" />
-            </Button>
+              className="backdrop-blur-sm"
+            />
           </motion.div>
         </div>
       </motion.header>
@@ -640,7 +633,7 @@ export default function HomePage() {
                     ? "Get personalized advice from agricultural experts and disease specialists"
                     : language === "hi"
                       ? "कृषि विशेषज्ञों और रोग विशेषज्ञों से व्यक्तिगत सलाह प्राप्त करें"
-                      : "వ్యవసాయ నిపుణులు మ���ియు వ్యాధి నిపుణుల నుండి వ్యక్తిగత సలహా పొందండి"}
+                      : "వ్యవసాయ నిపుణులు మరియు వ్యాధి నిపుణుల నుండి వ్యక్తిగత సలహా పొందండి"}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -696,7 +689,7 @@ export default function HomePage() {
                     ? "Experience the Future of Smart Farming"
                     : language === "hi"
                       ? "स्मार्ट कृषि के भविष्य का अनुभव करें"
-                      : "స్��ార్ట్ వ్యవసాయ భవిష్యత్తును అనుభవించండి"}
+                      : "స్మార్ట్ వ్యవసాయ భవిష్యత్తును అనుభవించండి"}
                 </CardTitle>
               </motion.div>
               <CardDescription className="text-lg">
