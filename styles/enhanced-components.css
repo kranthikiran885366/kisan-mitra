@@ -1,0 +1,322 @@
+/* Enhanced UI Components and Responsive Design */
+
+/* Enhanced Card Hover Effects */
+.enhanced-card {
+  @apply transition-all duration-300 ease-in-out;
+  @apply hover:shadow-xl hover:scale-105;
+}
+
+.enhanced-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Animated Gradients */
+.animated-gradient {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Enhanced Loading Animations */
+.pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    opacity: 0.9;
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+}
+
+/* Floating Elements */
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Enhanced Buttons */
+.enhanced-button {
+  @apply relative overflow-hidden;
+  @apply before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white before:to-transparent;
+  @apply before:translate-x-[-100%] before:transition-transform before:duration-700;
+  @apply hover:before:translate-x-[100%];
+}
+
+/* Glass Morphism Effect */
+.glass-morphism {
+  @apply backdrop-blur-sm bg-white/30;
+  @apply border border-white/20;
+  @apply shadow-lg;
+}
+
+/* Enhanced Form Inputs */
+.enhanced-input {
+  @apply transition-all duration-300;
+  @apply focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply hover:shadow-md;
+}
+
+/* Responsive Grid Layouts */
+.responsive-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+@media (max-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Enhanced Mobile Navigation */
+.mobile-nav {
+  @apply transform transition-transform duration-300 ease-in-out;
+}
+
+.mobile-nav.open {
+  @apply translate-x-0;
+}
+
+.mobile-nav.closed {
+  @apply -translate-x-full;
+}
+
+/* Smooth Scroll Behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced Typography */
+.enhanced-text {
+  @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+}
+
+/* Loading Skeleton Animations */
+.skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+
+.skeleton-line {
+  @apply h-4 bg-gray-200 rounded animate-pulse;
+}
+
+.skeleton-circle {
+  @apply w-12 h-12 bg-gray-200 rounded-full animate-pulse;
+}
+
+/* Enhanced Transitions */
+.smooth-transition {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Responsive Spacing */
+.responsive-padding {
+  @apply p-4 md:p-6 lg:p-8;
+}
+
+.responsive-margin {
+  @apply m-4 md:m-6 lg:m-8;
+}
+
+/* Enhanced Shadows */
+.enhanced-shadow {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.enhanced-shadow:hover {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive Text Sizes */
+.responsive-text-sm {
+  @apply text-sm md:text-base lg:text-lg;
+}
+
+.responsive-text-lg {
+  @apply text-lg md:text-xl lg:text-2xl;
+}
+
+.responsive-text-xl {
+  @apply text-xl md:text-2xl lg:text-3xl;
+}
+
+/* Enhanced Form Layout */
+.enhanced-form {
+  @apply space-y-6;
+}
+
+.enhanced-form .form-group {
+  @apply space-y-2;
+}
+
+.enhanced-form .form-row {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+/* Mobile-First Responsive Design */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    @apply hidden;
+  }
+  
+  .mobile-full-width {
+    @apply w-full;
+  }
+  
+  .mobile-stack {
+    @apply flex-col;
+  }
+  
+  .mobile-center {
+    @apply text-center;
+  }
+}
+
+/* Tablet Responsive Design */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .tablet-grid-2 {
+    @apply grid-cols-2;
+  }
+  
+  .tablet-hidden {
+    @apply hidden;
+  }
+}
+
+/* Desktop Enhancements */
+@media (min-width: 1024px) {
+  .desktop-grid-3 {
+    @apply grid-cols-3;
+  }
+  
+  .desktop-grid-4 {
+    @apply grid-cols-4;
+  }
+  
+  .desktop-fixed-sidebar {
+    @apply fixed;
+  }
+}
+
+/* Enhanced Accessibility */
+.focus-visible {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.screen-reader-only {
+  @apply sr-only;
+}
+
+/* Enhanced Animation Delays */
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+/* Enhanced Color Variations */
+.color-primary {
+  @apply bg-blue-600 text-white;
+}
+
+.color-secondary {
+  @apply bg-gray-600 text-white;
+}
+
+.color-success {
+  @apply bg-green-600 text-white;
+}
+
+.color-warning {
+  @apply bg-yellow-600 text-white;
+}
+
+.color-error {
+  @apply bg-red-600 text-white;
+}
+
+/* Enhanced Interactive Elements */
+.interactive-element {
+  @apply transition-all duration-200 ease-in-out;
+  @apply hover:scale-105 active:scale-95;
+  @apply cursor-pointer;
+}
+
+/* Print Styles */
+@media print {
+  .print-hidden {
+    @apply hidden;
+  }
+  
+  .print-page-break {
+    page-break-before: always;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .auto-contrast {
+    @apply border-2 border-black;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+  .auto-dark {
+    @apply bg-gray-900 text-white;
+  }
+  
+  .auto-dark-card {
+    @apply bg-gray-800 border-gray-700;
+  }
+}
