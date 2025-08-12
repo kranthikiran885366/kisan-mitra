@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 
@@ -11,14 +11,18 @@ export const metadata: Metadata = {
     "Get real-time weather updates, market rates, government schemes, and smart crop suggestions for farmers",
   keywords: "farming, agriculture, weather, market prices, government schemes, crop recommendations",
   authors: [{ name: "Krishi Mitra Team" }],
-  viewport: "width=device-width, initial-scale=1",
-  themeColor: "#16a34a",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-    generator: 'v0.dev'
+  generator: 'v0.dev'
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#16a34a',
 }
 
 export default function RootLayout({
