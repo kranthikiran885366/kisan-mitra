@@ -54,7 +54,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { usePageSpeech } from "@/hooks/use-speech"
+import VoiceAssistant from "@/components/voice-assistant"
 
 // Types
 type WeatherData = {
@@ -279,7 +279,6 @@ export default function WeatherPage() {
   const [selectedDay, setSelectedDay] = useState<number>(0)
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null)
   const [permissionDenied, setPermissionDenied] = useState<boolean>(false)
-  const { speakPageContent, isPlaying, isSupported } = usePageSpeech()
 
   // Fetch weather data
   const fetchWeatherData = useCallback(async (query: string) => {
@@ -357,14 +356,13 @@ export default function WeatherPage() {
     setIsMetric(!isMetric)
   }
 
-  // Speech function for weather information
-  const speakWeatherInfo = () => {
-    if (!weatherData) return
+  const getWeatherContent = () => {
+    if (!weatherData) return translations[language]?.title || 'Weather Updates'
 
     const current = weatherData.current
     const location = weatherData.location
 
-    const weatherText = translations[language].getWeatherSummary
+    return translations[language].getWeatherSummary
       ? translations[language].getWeatherSummary(
           location.name,
           current.condition.text,
@@ -375,8 +373,6 @@ export default function WeatherPage() {
           isMetric ? 'kilometers per hour' : 'miles per hour'
         )
       : `Current weather in ${location.name}: ${current.condition.text}, temperature ${isMetric ? Math.round(current.temp_c) : Math.round(current.temp_f)} degrees ${isMetric ? 'Celsius' : 'Fahrenheit'}, humidity ${current.humidity} percent, wind speed ${isMetric ? current.wind_kph : (current.wind_kph * 0.621371).toFixed(1)} ${isMetric ? 'kilometers per hour' : 'miles per hour'}`
-
-    speakPageContent(weatherText, language)
   }
 
   // Render loading state
@@ -479,18 +475,14 @@ export default function WeatherPage() {
               <span className={`text-sm font-medium ${!isMetric ? 'text-blue-600' : 'text-gray-500'}`}>°F</span>
             </div>
 
-            {isSupported && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={speakWeatherInfo}
-                className={`flex items-center gap-2 ${isPlaying ? 'animate-pulse bg-blue-50' : ''}`}
-                disabled={!weatherData}
-              >
-                {isPlaying ? <Volume2 className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                {translations[language]?.speakWeather || 'Speak Weather'}
-              </Button>
-            )}
+            <VoiceAssistant
+              content={getWeatherContent()}
+              language={language}
+              size="sm"
+              translations={{
+                speak: translations[language]?.speakWeather || 'Speak Weather'
+              }}
+            />
             
             <div className="flex items-center space-x-2">
               <Button 
@@ -866,7 +858,7 @@ const translations = {
     title: "వాతావరణ నవీకరణలు",
     speakWeather: "వాతావరణం వినండి",
     getWeatherSummary: (location: string, condition: string, temp: number, tempUnit: string, humidity: number, windSpeed: string, windUnit: string) =>
-      `${location}లో ప్రస్తుత వాతావరణం: ${condition}, ఉష్ణోగ్రత ${temp} డిగ్రీ��ు ${tempUnit === 'Celsius' ? 'సెల్సియస్' : 'ఫారెన్‌హీట్'}, తేమ ${humidity} శాతం, గాలి వేగం ${windSpeed} ${windUnit === 'kilometers per hour' ? 'కిలోమీటర్లు గంటకు' : 'మైళ్లు గంటకు'}`,
+      `${location}లో ప్రస్తుత వాతావరణం: ${condition}, ఉష్ణోగ్రత ${temp} డిగ్రీలు ${tempUnit === 'Celsius' ? 'సెల్సియస్' : 'ఫారెన్‌హీట్'}, తేమ ${humidity} శాతం, గాలి వేగం ${windSpeed} ${windUnit === 'kilometers per hour' ? 'కిలోమీటర్లు గంటకు' : 'మైళ్లు గంటకు'}`,
     searchPlaceholder: "స్థానం వెతకండి...",
     currentWeather: "ప్రస్తుత వాతావరణం",
     feelsLike: "అనుభూతి",
@@ -898,7 +890,7 @@ const translations = {
     airQualityIndex: "గాలి నాణ్యత సూచిక",
     aqiGood: "మంచిది",
     aqiModerate: "మధ్యస్థం",
-    aqiUnhealthyForSensitive: "సున్నితమైన వారికి అనుకూలం కాదు",
+    aqiUnhealthyForSensitive: "సున్నితమైన వారికి అనుక��లం కాదు",
     aqiUnhealthy: "ఆరోగ్యానికి హానికరం",
     aqiVeryUnhealthy: "చాలా ఆరోగ్యానికి హానికరం",
     aqiHazardous: "అత్యంత ప్రమాదకరం",
