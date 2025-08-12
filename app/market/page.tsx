@@ -20,15 +20,21 @@ import {
   AlertTriangle,
   BarChart3,
   Calendar,
-  ArrowLeft
+  ArrowLeft,
+  Mic,
+  Volume2
 } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { useRouter } from "next/navigation"
 import { marketApi, MarketPrice, MarketAnalysis, NearbyMarket, PriceAlert } from "@/lib/marketApi"
+import { usePageSpeech } from "@/hooks/use-speech"
 
 const translations = {
   en: {
     title: "Market Rates",
+    speakSummary: "Speak Summary",
+    getMarketSummary: (crops: number, markets: number, avgPrice: number) =>
+      `Market summary: ${crops} crops available in ${markets} markets with average price of ${avgPrice} rupees per quintal`,
     searchPlaceholder: "Search crops...",
     location: "Location",
     commodity: "Commodity",
@@ -73,6 +79,9 @@ const translations = {
   },
   hi: {
     title: "बाजार दरें",
+    speakSummary: "सारांश सुनें",
+    getMarketSummary: (crops: number, markets: number, avgPrice: number) =>
+      `बाजार सारांश: ${markets} बाजारों में ${crops} फसलें उपलब्ध हैं औसत कीमत ${avgPrice} रुपए प्रति क्विंटल`,
     searchPlaceholder: "फसलें खोजें...",
     location: "स्थान",
     commodity: "वस्तु",
@@ -109,7 +118,7 @@ const translations = {
     medium: "मध्यम",
     low: "कम",
     stable: "स्थिर",
-    increasing: "बढ़ रहा",
+    increasing: "बढ��� रहा",
     decreasing: "घट रहा",
     days: "दिन",
     km: "किमी",
@@ -117,6 +126,9 @@ const translations = {
   },
   te: {
     title: "మార్కెట్ రేట్లు",
+    speakSummary: "సారాంశం వినండి",
+    getMarketSummary: (crops: number, markets: number, avgPrice: number) =>
+      `మార్కెట్ సారాంశం: ${markets} మార్కెట్లలో ${crops} పంటలు అందుబాటులో ఉన్నాయి సగటు ధర క్వింటల్‌కు ${avgPrice} రూపాయలు`,
     searchPlaceholder: "పంటలను వెతకండి...",
     location: "స్థానం",
     commodity: "వస్తువు",
@@ -154,7 +166,7 @@ const translations = {
     low: "తక్కువ",
     stable: "స్థిరమైన",
     increasing: "పెరుగుతున్న",
-    decreasing: "తగ్గుతున్న",
+    decreasing: "��గ్గుతున్న",
     days: "రోజులు",
     km: "కిమీ",
     quintal: "క్వింటల్",
@@ -178,6 +190,7 @@ export default function MarketPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+  const { speakPageContent, isPlaying, isSupported } = usePageSpeech()
 
   const t = translations[language]
 
@@ -229,6 +242,16 @@ export default function MarketPage() {
     } catch (err) {
       console.error('Error refreshing data:', err)
     }
+  }
+
+  const speakMarketSummary = () => {
+    if (!stats) return
+
+    const summaryText = t.getMarketSummary
+      ? t.getMarketSummary(stats.totalCrops, stats.totalMarkets, stats.avgPrice)
+      : `Market summary: ${stats.totalCrops} crops available in ${stats.totalMarkets} markets with average price of ${stats.avgPrice} rupees per quintal`
+
+    speakPageContent(summaryText, language)
   }
 
   const filteredPrices = prices.filter(price => 
@@ -300,6 +323,17 @@ export default function MarketPage() {
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               {t.refresh}
             </Button>
+            {isSupported && (
+              <Button
+                variant="outline"
+                onClick={speakMarketSummary}
+                className={`flex items-center gap-2 ${isPlaying ? 'animate-pulse bg-blue-50' : ''}`}
+                disabled={!stats}
+              >
+                {isPlaying ? <Volume2 className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                {t.speakSummary || 'Speak Summary'}
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => router.push('/dashboard')}
