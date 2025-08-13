@@ -13,10 +13,16 @@ import {
   Users,
   Stethoscope,
   MessageCircle,
+  Star,
+  CheckCircle,
+  Play,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import Image from "next/image"
+import VoiceAssistant from "@/components/voice-assistant"
+import ClientOnly from "@/components/client-only"
 
 const translations = {
   en: {
@@ -24,6 +30,7 @@ const translations = {
     subtitle: "AI-Powered Smart Farming Assistant",
     description:
       "Get AI-powered crop disease diagnosis, real-time weather, market rates, WhatsApp farmer groups, and expert farming guidance",
+    heroSubtext: "Empowering farmers with cutting-edge technology for sustainable and profitable agriculture",
     features: {
       weather: "Weather Updates",
       market: "Market Rates",
@@ -36,15 +43,21 @@ const translations = {
     },
     getStarted: "Start Farming Smart",
     login: "Login",
+    watchDemo: "Watch Demo",
     aiPowered: "AI-Powered Disease Detection",
     communitySupport: "WhatsApp Farmer Communities",
     expertGuidance: "Expert Farming Guidance",
+    trustedBy: "Trusted by farmers across India",
+    successStories: "Success Stories",
+    testimonial: "Kisan Mitra helped me increase my crop yield by 40% and detect diseases early. It's a game-changer!",
+    farmerName: "Rajesh Kumar, Farmer from Punjab",
   },
   hi: {
     title: "किसान मित्र",
     subtitle: "AI-संचालित स्मार्ट कृषि सहायक",
     description:
       "AI-संचालित फसल रोग निदान, वास्तविक समय मौसम, बाजार दरें, व्हाट्सएप किसान समूह और विशेषज्ञ कृषि मार्गदर्शन प्राप्त करें",
+    heroSubtext: "टिकाऊ और लाभदायक कृषि के लिए अत्याधुनिक तकनीक से किसानों को सशक्त बनाना",
     features: {
       weather: "मौसम अपडेट",
       market: "बाजार दरें",
@@ -57,15 +70,21 @@ const translations = {
     },
     getStarted: "स्मार्ट खेती शुरू करें",
     login: "लॉगिन",
+    watchDemo: "डेमो देखें",
     aiPowered: "AI-संचालित रोग पहचान",
     communitySupport: "व्हाट्सएप किसान समुदाय",
     expertGuidance: "विशेषज्ञ कृषि मार्गदर्शन",
+    trustedBy: "भारत भर के किसानों द्वारा विश्वसनीय",
+    successStories: "सफलता की कहानियां",
+    testimonial: "किसान मित्र ने मेरी फसल की पैदावार 40% बढ़ाने और बीमारियों का जल्दी पता लगाने में मदद की।",
+    farmerName: "राजेश कुमार, पंजाब के किसान",
   },
   te: {
     title: "కిసాన్ మిత్ర",
     subtitle: "AI-శక్తితో కూడిన స్మార్ట్ వ్యవసాయ సహాయకుడు",
     description:
       "AI-శక్తితో కూడిన పంట వ్యాధి నిర్ధారణ, రియల్ టైమ్ వాతావరణం, మార్కెట్ రేట్లు, వాట్సాప్ రైతు గ్రూపులు మరియు నిపుణుల వ్యవసాయ మార్గదర్శకత్వం పొందండి",
+    heroSubtext: "స్థిరమైన మరియు లాభదాయకమైన వ్యవసాయం కోసం అత్యాధునిక సాంకేతికతతో రైతులను శక్తివంతం చేయడం",
     features: {
       weather: "వాతావరణ అప్‌డేట్‌లు",
       market: "మార్కెట్ రేట్లు",
@@ -78,9 +97,14 @@ const translations = {
     },
     getStarted: "స్మార్ట్ వ్యవసాయం ప్రారంభించండి",
     login: "లాగిన్",
+    watchDemo: "డెమో చూడండి",
     aiPowered: "AI-శక్తితో వ్యాధి గుర్తింపు",
     communitySupport: "వాట్సాప్ రైతు కమ్యూనిటీలు",
     expertGuidance: "నిపుణుల వ్యవసాయ మార్గదర్శకత్వం",
+    trustedBy: "భారతదేశం అంతటా రైతులచే విశ్వసనీయమైనది",
+    successStories: "విజయ కథలు",
+    testimonial: "కిసాన్ మిత్ర నా పంట దిగుబడిని 40% పెంచడంలో మరియు వ్యాధులను త్వరగా గుర్తించడంలో సహాయపడింది।",
+    farmerName: "రాజేష్ కుమార్, పంజాబ్‌కు చెందిన రైతు",
   },
 }
 
@@ -89,14 +113,8 @@ export default function HomePage() {
   const [isPlaying, setIsPlaying] = useState(false)
   const t = translations[language]
 
-  const speakText = (text: string) => {
-    if ("speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(text)
-      utterance.lang = language === "en" ? "en-US" : language === "hi" ? "hi-IN" : "te-IN"
-      speechSynthesis.speak(utterance)
-      setIsPlaying(true)
-      utterance.onend = () => setIsPlaying(false)
-    }
+  const getPageContent = () => {
+    return `${t.title}. ${t.subtitle}. ${t.description}. ${t.heroSubtext}`
   }
 
   const features = [
@@ -188,23 +206,23 @@ export default function HomePage() {
           transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY }}
         />
 
-        {/* Floating particles */}
+        {/* Floating particles with fixed positions for SSR */}
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-green-300 rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${(i * 5.26) % 100}%`,
+              top: `${(i * 3.14) % 100}%`,
             }}
             animate={{
               y: [0, -100, 0],
               opacity: [0, 1, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 3 + (i % 3),
               repeat: Number.POSITIVE_INFINITY,
-              delay: Math.random() * 2,
+              delay: (i % 5) * 0.4,
             }}
           />
         ))}
@@ -241,97 +259,207 @@ export default function HomePage() {
           </motion.select>
 
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => speakText(t.description)}
-              className={`${isPlaying ? "animate-pulse bg-green-100" : ""} backdrop-blur-sm`}
-            >
-              <Mic className="h-4 w-4" />
-            </Button>
+            <ClientOnly>
+              <VoiceAssistant
+                content={getPageContent()}
+                language={language}
+                size="icon"
+                className="backdrop-blur-sm"
+              />
+            </ClientOnly>
           </motion.div>
         </div>
       </motion.header>
 
       {/* Main Content */}
       <main className="relative z-10 container mx-auto px-4 py-12">
+        {/* Hero Section with Image */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <motion.h1
-            className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
-            animate={{
-              backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-            }}
-            transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY }}
-          >
-            {t.title}
-          </motion.h1>
-          <motion.p
-            className="text-xl md:text-2xl text-green-600 mb-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            {t.subtitle}
-          </motion.p>
-          <motion.p
-            className="text-lg text-gray-700 max-w-3xl mx-auto mb-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            {t.description}
-          </motion.p>
-
-          <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <Link href="/auth/signup">
-              <motion.div
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
-                whileTap={{ scale: 0.95 }}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
+            {/* Hero Content */}
+            <div className="text-left lg:text-left">
+              <motion.h1
+                className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-6"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY }}
               >
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3"
-                >
-                  {t.getStarted}
+                {t.title}
+              </motion.h1>
+              <motion.p
+                className="text-xl md:text-2xl text-green-600 mb-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {t.subtitle}
+              </motion.p>
+              <motion.p
+                className="text-lg text-gray-700 mb-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                {t.description}
+              </motion.p>
+              <motion.p
+                className="text-md text-gray-600 mb-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+              >
+                {t.heroSubtext}
+              </motion.p>
+
+              <motion.div
+                className="flex flex-col sm:flex-row gap-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+              >
+                <Link href="/auth/signup">
                   <motion.div
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3"
+                    >
+                      {t.getStarted}
+                      <motion.div
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                      >
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </motion.div>
+                    </Button>
                   </motion.div>
-                </Button>
+                </Link>
+                <Link href="/auth/login">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="px-8 py-3 bg-white/80 backdrop-blur-sm border-2 border-green-300"
+                    >
+                      {t.login}
+                    </Button>
+                  </motion.div>
+                </Link>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    className="px-8 py-3 text-green-700 hover:bg-green-50"
+                  >
+                    <Play className="mr-2 h-5 w-5" />
+                    {t.watchDemo}
+                  </Button>
+                </motion.div>
               </motion.div>
-            </Link>
-            <Link href="/auth/login">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="px-8 py-3 bg-white/80 backdrop-blur-sm border-2 border-green-300"
+            </div>
+
+            {/* Hero Image */}
+            <motion.div 
+              className="relative"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+            >
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src="https://images.pexels.com/photos/3770775/pexels-photo-3770775.jpeg"
+                  alt="Indian farmers using modern farming technology"
+                  width={600}
+                  height={400}
+                  className="w-full h-auto object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 to-transparent" />
+                <motion.div
+                  className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2 }}
                 >
-                  {t.login}
-                </Button>
-              </motion.div>
-            </Link>
-          </motion.div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-sm font-medium text-gray-800">{t.trustedBy}</span>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Technology Showcase Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mb-16"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <motion.div className="relative rounded-xl overflow-hidden shadow-lg">
+              <Image
+                src="https://images.pexels.com/photos/5230963/pexels-photo-5230963.jpeg"
+                alt="Smart farming with tablet technology"
+                width={400}
+                height={300}
+                className="w-full h-64 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent" />
+              <div className="absolute bottom-4 left-4 text-white">
+                <h3 className="font-semibold text-lg">Smart Technology</h3>
+                <p className="text-sm opacity-90">Advanced farming tools</p>
+              </div>
+            </motion.div>
+
+            <motion.div className="relative rounded-xl overflow-hidden shadow-lg">
+              <Image
+                src="https://images.pexels.com/photos/33339086/pexels-photo-33339086.jpeg"
+                alt="Farmers working together in rice field"
+                width={400}
+                height={300}
+                className="w-full h-64 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-green-900/60 to-transparent" />
+              <div className="absolute bottom-4 left-4 text-white">
+                <h3 className="font-semibold text-lg">Community Power</h3>
+                <p className="text-sm opacity-90">Farmers working together</p>
+              </div>
+            </motion.div>
+
+            <motion.div className="relative rounded-xl overflow-hidden shadow-lg">
+              <Image
+                src="https://images.pexels.com/photos/7599097/pexels-photo-7599097.jpeg"
+                alt="Healthy crop harvest"
+                width={400}
+                height={300}
+                className="w-full h-64 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-orange-900/60 to-transparent" />
+              <div className="absolute bottom-4 left-4 text-white">
+                <h3 className="font-semibold text-lg">Quality Harvest</h3>
+                <p className="text-sm opacity-90">Better crop yields</p>
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
 
         {/* Enhanced Features Grid */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
         >
           {features.map((feature, index) => (
             <Link href={feature.path} key={feature.key} className="block h-full">
@@ -402,16 +530,26 @@ export default function HomePage() {
           ))}
         </motion.div>
 
-        {/* New Feature Highlights */}
+        {/* Feature Highlights with Images */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
         >
           {/* AI Disease Detection */}
           <motion.div whileHover={{ scale: 1.02, y: -5 }} className="group">
-            <Card className="h-full bg-gradient-to-br from-pink-50 to-rose-50 border-2 border-pink-200 group-hover:border-pink-400 transition-all duration-300">
+            <Card className="h-full bg-gradient-to-br from-pink-50 to-rose-50 border-2 border-pink-200 group-hover:border-pink-400 transition-all duration-300 overflow-hidden">
+              <div className="relative h-48">
+                <Image
+                  src="https://images.pexels.com/photos/14828474/pexels-photo-14828474.jpeg"
+                  alt="AI-powered farming technology"
+                  width={400}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-pink-900/40 to-transparent" />
+              </div>
               <CardHeader>
                 <motion.div
                   animate={{ rotate: [0, 360] }}
@@ -425,7 +563,7 @@ export default function HomePage() {
                   {language === "en"
                     ? "Upload crop photos for instant AI-powered disease diagnosis with organic & inorganic treatment options"
                     : language === "hi"
-                      ? "तत्काल AI-संचालित रोग निदान के लिए फसल की तस्वीरें अपलोड करें"
+                      ? "तत्काल AI-संचालित र��ग निदान के लिए फसल की तस्वीरें अपलोड करें"
                       : "తక్షణ AI-శక్తితో వ్యాధి నిర్ధారణ కోసం పంట ఫోటోలను అప్‌లోడ్ చేయండి"}
                 </CardDescription>
               </CardHeader>
@@ -434,7 +572,17 @@ export default function HomePage() {
 
           {/* WhatsApp Communities */}
           <motion.div whileHover={{ scale: 1.02, y: -5 }} className="group">
-            <Card className="h-full bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 group-hover:border-green-400 transition-all duration-300">
+            <Card className="h-full bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 group-hover:border-green-400 transition-all duration-300 overflow-hidden">
+              <div className="relative h-48">
+                <Image
+                  src="https://images.pexels.com/photos/15031234/pexels-photo-15031234.jpeg"
+                  alt="Community support and assistance"
+                  width={400}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-green-900/40 to-transparent" />
+              </div>
               <CardHeader>
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
@@ -457,7 +605,17 @@ export default function HomePage() {
 
           {/* Expert Guidance */}
           <motion.div whileHover={{ scale: 1.02, y: -5 }} className="group">
-            <Card className="h-full bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 group-hover:border-blue-400 transition-all duration-300">
+            <Card className="h-full bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 group-hover:border-blue-400 transition-all duration-300 overflow-hidden">
+              <div className="relative h-48">
+                <Image
+                  src="https://images.pexels.com/photos/3220348/pexels-photo-3220348.jpeg"
+                  alt="Healthy crop growth and expert guidance"
+                  width={400}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent" />
+              </div>
               <CardHeader>
                 <motion.div
                   animate={{
@@ -485,11 +643,34 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
 
-        {/* Enhanced Demo Section */}
+        {/* Testimonial Section */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          className="mb-16"
+        >
+          <Card className="max-w-4xl mx-auto bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-green-800 mb-4">{t.successStories}</CardTitle>
+              <div className="flex justify-center mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-6 w-6 text-yellow-500 fill-current" />
+                ))}
+              </div>
+              <blockquote className="text-lg italic text-gray-700 mb-4">
+                "{t.testimonial}"
+              </blockquote>
+              <cite className="text-sm font-medium text-green-600">- {t.farmerName}</cite>
+            </CardHeader>
+          </Card>
+        </motion.div>
+
+        {/* Enhanced Statistics Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.0 }}
           className="text-center"
         >
           <Card className="max-w-6xl mx-auto bg-white/95 backdrop-blur-sm border-2 border-green-200 overflow-hidden">
@@ -504,7 +685,7 @@ export default function HomePage() {
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
+                transition={{ delay: 1.2, type: "spring", stiffness: 200 }}
               >
                 <CardTitle className="text-3xl text-green-800 mb-4">
                   {language === "en"
@@ -519,7 +700,7 @@ export default function HomePage() {
                   ? "Join thousands of farmers already using Kisan Mitra for smarter, more profitable farming"
                   : language === "hi"
                     ? "हजारों किसानों के साथ जुड़ें जो पहले से ही स्मार्ट और अधिक लाभदायक खेती के लिए किसान मित्र का उपयोग कर रहे हैं"
-                    : "స్మార్ట్, మరింత లాభదాయకమైన వ్యవసాయం కోసం ఇప్పటికే కిసాన్ మిత్రను ఉపయోగిస్తున్న వేలాది రైతులతో చేరండి"}
+                    : "స్మార్ట్, మరింత లాభదాయకమైన వ్యవసాయం కోసం ఇప్పటికే క��సాన్ మిత్రను ఉపయోగిస్తున్న వేలాది రైతులతో చేరండి"}
               </CardDescription>
             </CardHeader>
             <CardContent className="relative z-10">
@@ -542,7 +723,7 @@ export default function HomePage() {
                   },
                   {
                     number: "1000+",
-                    label: language === "en" ? "WhatsApp Groups" : language === "hi" ? "व्हाट्सएप समूह" : "వాట్సాప్ గ్రూపులు",
+                    label: language === "en" ? "WhatsApp Groups" : language === "hi" ? "व्हाट्���एप समूह" : "వాట్సాప్ గ్రూపులు",
                     color: "text-purple-600",
                   },
                   {
@@ -555,7 +736,7 @@ export default function HomePage() {
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1 + index * 0.1 }}
+                    transition={{ delay: 1.4 + index * 0.1 }}
                     whileHover={{ scale: 1.05 }}
                   >
                     <motion.div

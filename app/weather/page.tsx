@@ -32,7 +32,9 @@ import {
   Moon,
   CloudSnow,
   CloudDrizzle,
-  RefreshCw
+  RefreshCw,
+  Mic,
+  Volume2
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { 
@@ -52,6 +54,8 @@ import { useToast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import VoiceAssistant from "@/components/voice-assistant"
+import ClientOnly from "@/components/client-only"
 
 // Types
 type WeatherData = {
@@ -353,6 +357,25 @@ export default function WeatherPage() {
     setIsMetric(!isMetric)
   }
 
+  const getWeatherContent = () => {
+    if (!weatherData) return translations[language]?.title || 'Weather Updates'
+
+    const current = weatherData.current
+    const location = weatherData.location
+
+    return translations[language].getWeatherSummary
+      ? translations[language].getWeatherSummary(
+          location.name,
+          current.condition.text,
+          isMetric ? Math.round(current.temp_c) : Math.round(current.temp_f),
+          isMetric ? 'Celsius' : 'Fahrenheit',
+          current.humidity,
+          isMetric ? current.wind_kph : (current.wind_kph * 0.621371).toFixed(1),
+          isMetric ? 'kilometers per hour' : 'miles per hour'
+        )
+      : `Current weather in ${location.name}: ${current.condition.text}, temperature ${isMetric ? Math.round(current.temp_c) : Math.round(current.temp_f)} degrees ${isMetric ? 'Celsius' : 'Fahrenheit'}, humidity ${current.humidity} percent, wind speed ${isMetric ? current.wind_kph : (current.wind_kph * 0.621371).toFixed(1)} ${isMetric ? 'kilometers per hour' : 'miles per hour'}`
+  }
+
   // Render loading state
   if (loading && !weatherData) {
     return (
@@ -445,13 +468,24 @@ export default function WeatherPage() {
           <div className="mt-4 md:mt-0 flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <span className={`text-sm font-medium ${isMetric ? 'text-blue-600' : 'text-gray-500'}`}>°C</span>
-              <Switch 
-                id="temperature-unit" 
+              <Switch
+                id="temperature-unit"
                 checked={!isMetric}
                 onCheckedChange={toggleUnits}
               />
               <span className={`text-sm font-medium ${!isMetric ? 'text-blue-600' : 'text-gray-500'}`}>°F</span>
             </div>
+
+            <ClientOnly>
+              <VoiceAssistant
+                content={getWeatherContent()}
+                language={language}
+                size="sm"
+                translations={{
+                  speak: translations[language]?.speakWeather || 'Speak Weather'
+                }}
+              />
+            </ClientOnly>
             
             <div className="flex items-center space-x-2">
               <Button 
@@ -773,6 +807,9 @@ export default function WeatherPage() {
 const translations = {
   en: {
     title: "Weather Updates",
+    speakWeather: "Speak Weather",
+    getWeatherSummary: (location: string, condition: string, temp: number, tempUnit: string, humidity: number, windSpeed: string, windUnit: string) =>
+      `Current weather in ${location}: ${condition}, temperature ${temp} degrees ${tempUnit}, humidity ${humidity} percent, wind speed ${windSpeed} ${windUnit}`,
     searchPlaceholder: "Search location...",
     currentWeather: "Current Weather",
     feelsLike: "Feels like",
@@ -796,6 +833,9 @@ const translations = {
   },
   hi: {
     title: "मौसम अपडेट",
+    speakWeather: "मौसम सुनें",
+    getWeatherSummary: (location: string, condition: string, temp: number, tempUnit: string, humidity: number, windSpeed: string, windUnit: string) =>
+      `${location} में वर्तमान मौसम: ${condition}, तापमान ${temp} डिग्री ${tempUnit === 'Celsius' ? 'सेल्सियस' : 'फारेनहाइट'}, आर्द्रता ${humidity} प्रतिशत, हवा की गति ${windSpeed} ${windUnit === 'kilometers per hour' ? 'किलोमीटर प्रति घंटा' : 'मील प्रति घंटा'}`,
     searchPlaceholder: "स्थान खोजें...",
     currentWeather: "वर्तमान मौसम",
     feelsLike: "महसूस हो रहा है",
@@ -818,7 +858,10 @@ const translations = {
     backToDashboard: "डैशबोर्ड पर वापस जाएं",
   },
   te: {
-    title: "వాతావరణ నవీకరణలు",
+    title: "వాతావరణ నవ��కరణలు",
+    speakWeather: "వాతావరణం వినండి",
+    getWeatherSummary: (location: string, condition: string, temp: number, tempUnit: string, humidity: number, windSpeed: string, windUnit: string) =>
+      `${location}లో ప్రస్తుత వాతావరణం: ${condition}, ఉష్ణోగ్రత ${temp} డిగ్రీలు ${tempUnit === 'Celsius' ? 'సెల్సియస్' : 'ఫారెన్‌హీట్'}, తేమ ${humidity} శాతం, గాలి వేగం ${windSpeed} ${windUnit === 'kilometers per hour' ? 'కిలోమీటర్లు గంటకు' : 'మైళ్లు గంటకు'}`,
     searchPlaceholder: "స్థానం వెతకండి...",
     currentWeather: "ప్రస్తుత వాతావరణం",
     feelsLike: "అనుభూతి",
@@ -831,7 +874,7 @@ const translations = {
     sunrise: "సూర్యోదయం",
     sunset: "సూర్యాస్తమయం",
     windGust: "గాలి వేగం (గస్ట్)",
-    precipitation: "వర్షపాతం",
+    precipitation: "వర్ష���ాతం",
     chanceOfRain: "వర్షపాత అవకాశం",
     hourlyForecast: "గంటవారీ అంచనా",
     dailyForecast: "రోజువారీ అంచనా",
@@ -850,7 +893,7 @@ const translations = {
     airQualityIndex: "గాలి నాణ్యత సూచిక",
     aqiGood: "మంచిది",
     aqiModerate: "మధ్యస్థం",
-    aqiUnhealthyForSensitive: "సున్నితమైన వారికి అనుకూలం కాదు",
+    aqiUnhealthyForSensitive: "సున్నితమైన వారికి అనుక��లం కాదు",
     aqiUnhealthy: "ఆరోగ్యానికి హానికరం",
     aqiVeryUnhealthy: "చాలా ఆరోగ్యానికి హానికరం",
     aqiHazardous: "అత్యంత ప్రమాదకరం",

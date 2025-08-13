@@ -20,15 +20,22 @@ import {
   AlertTriangle,
   BarChart3,
   Calendar,
-  ArrowLeft
+  ArrowLeft,
+  Mic,
+  Volume2
 } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { useRouter } from "next/navigation"
 import { marketApi, MarketPrice, MarketAnalysis, NearbyMarket, PriceAlert } from "@/lib/marketApi"
+import VoiceAssistant from "@/components/voice-assistant"
+import ClientOnly from "@/components/client-only"
 
 const translations = {
   en: {
     title: "Market Rates",
+    speakSummary: "Speak Summary",
+    getMarketSummary: (crops: number, markets: number, avgPrice: number) =>
+      `Market summary: ${crops} crops available in ${markets} markets with average price of ${avgPrice} rupees per quintal`,
     searchPlaceholder: "Search crops...",
     location: "Location",
     commodity: "Commodity",
@@ -73,6 +80,9 @@ const translations = {
   },
   hi: {
     title: "बाजार दरें",
+    speakSummary: "सारांश सुनें",
+    getMarketSummary: (crops: number, markets: number, avgPrice: number) =>
+      `बाजार सारांश: ${markets} बाजारों में ${crops} फसलें उपलब्ध हैं औसत कीमत ${avgPrice} रुपए प्रति क्विंटल`,
     searchPlaceholder: "फसलें खोजें...",
     location: "स्थान",
     commodity: "वस्तु",
@@ -85,7 +95,7 @@ const translations = {
     sortBy: "क्रमबद्ध करें",
     backToDashboard: "डैशबोर्ड पर वापस",
     loading: "लोड हो रहा है...",
-    error: "डेटा लोड करने में त्रुटि",
+    error: "डेटा लोड करने ��ें त्रुटि",
     retry: "पुनः प्रयास करें",
     refresh: "रिफ्रेश करें",
     priceAnalysis: "मूल्य विश्लेषण",
@@ -116,7 +126,10 @@ const translations = {
     quintal: "क्विंटल",
   },
   te: {
-    title: "మార్కెట్ రేట్లు",
+    title: "మ��ర్కెట్ రేట్లు",
+    speakSummary: "సారాంశం వినండి",
+    getMarketSummary: (crops: number, markets: number, avgPrice: number) =>
+      `మార్కెట్ సారాంశం: ${markets} మార్కెట్లలో ${crops} పంటలు అందుబాటులో ఉన్నాయి సగటు ధర క్వింటల్‌కు ${avgPrice} రూపాయలు`,
     searchPlaceholder: "పంటలను వెతకండి...",
     location: "స్థానం",
     commodity: "వస్తువు",
@@ -133,7 +146,7 @@ const translations = {
     retry: "మళ్లీ ప్రయత్నించండి",
     refresh: "రిఫ్రెష్ చేయండి",
     priceAnalysis: "ధర విశ్లేషణ",
-    marketTrends: "మార్కెట్ ట్రెండ్స్",
+    marketTrends: "మార్కెట్ ట��రెండ్స్",
     nearbyMarkets: "సమీప మార్కెట్లు",
     alerts: "ధర అలర్ట్లు",
     forecast: "ధర అంచనా",
@@ -231,6 +244,14 @@ export default function MarketPage() {
     }
   }
 
+  const getMarketContent = () => {
+    if (!stats) return t.title
+
+    return t.getMarketSummary
+      ? t.getMarketSummary(stats.totalCrops, stats.totalMarkets, stats.avgPrice)
+      : `Market summary: ${stats.totalCrops} crops available in ${stats.totalMarkets} markets with average price of ${stats.avgPrice} rupees per quintal`
+  }
+
   const filteredPrices = prices.filter(price => 
     price.cropName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     price.variety.toLowerCase().includes(searchTerm.toLowerCase())
@@ -300,6 +321,15 @@ export default function MarketPage() {
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               {t.refresh}
             </Button>
+            <ClientOnly>
+              <VoiceAssistant
+                content={getMarketContent()}
+                language={language}
+                translations={{
+                  speak: t.speakSummary || 'Speak Summary'
+                }}
+              />
+            </ClientOnly>
             <Button
               variant="outline"
               onClick={() => router.push('/dashboard')}
@@ -332,7 +362,7 @@ export default function MarketPage() {
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-purple-600">₹{stats.avgPrice}</p>
+                <p className="text-2xl font-bold text-purple-600">��{stats.avgPrice}</p>
                 <p className="text-sm text-gray-600">{t.avgPrice}</p>
               </CardContent>
             </Card>

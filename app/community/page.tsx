@@ -35,14 +35,18 @@ import {
   Video,
   FileText,
   Send,
-  X
+  X,
+  Mic,
+  Volume2
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { communityApi, CommunityPost, CommunityGroup, CreatePostData, CreateGroupData } from "@/lib/communityApi"
+import { usePageSpeech } from "@/hooks/use-speech"
 
 const translations = {
   en: {
     title: "Farmer's Community",
+    speakPost: "Speak Post",
     searchPlaceholder: "Search discussions...",
     newPost: "New Post",
     createGroup: "Create Group",
@@ -120,7 +124,7 @@ const translations = {
     joinGroup: "समूह में शामिल हों",
     leaveGroup: "समूह छोड़ें",
     members: "सदस्य",
-    online: "ऑनलाइन",
+    online: "ऑनल��इन",
     like: "पसंद",
     comment: "टिप्पणी",
     share: "साझा करें",
@@ -235,6 +239,7 @@ const translations = {
 export default function CommunityPage() {
   const router = useRouter()
   const [language, setLanguage] = useState<'en' | 'hi' | 'te'>('en')
+  const { speakPageContent, isPlaying, isSupported } = usePageSpeech()
   const [activeTab, setActiveTab] = useState("feed")
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
@@ -272,6 +277,10 @@ export default function CommunityPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const t = translations[language]
+
+  const speakPost = (postContent: string) => {
+    speakPageContent(postContent, language)
+  }
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem('language') as 'en' | 'hi' | 'te'
