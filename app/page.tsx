@@ -259,12 +259,14 @@ export default function HomePage() {
           </motion.select>
 
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <VoiceAssistant
-              content={getPageContent()}
-              language={language}
-              size="icon"
-              className="backdrop-blur-sm"
-            />
+            <ClientOnly>
+              <VoiceAssistant
+                content={getPageContent()}
+                language={language}
+                size="icon"
+                className="backdrop-blur-sm"
+              />
+            </ClientOnly>
           </motion.div>
         </div>
       </motion.header>
@@ -561,7 +563,7 @@ export default function HomePage() {
                   {language === "en"
                     ? "Upload crop photos for instant AI-powered disease diagnosis with organic & inorganic treatment options"
                     : language === "hi"
-                      ? "तत्काल AI-संचालित रोग निदान के लिए फसल की तस्वीरें अपलोड करें"
+                      ? "तत्काल AI-संचालित र��ग निदान के लिए फसल की तस्वीरें अपलोड करें"
                       : "తక్షణ AI-శక్తితో వ్యాధి నిర్ధారణ కోసం పంట ఫోటోలను అప్‌లోడ్ చేయండి"}
                 </CardDescription>
               </CardHeader>
@@ -633,7 +635,7 @@ export default function HomePage() {
                   {language === "en"
                     ? "Get personalized advice from agricultural experts and disease specialists"
                     : language === "hi"
-                      ? "कृषि विशेषज्ञों और रोग विशेषज्ञों से व्यक्तिगत स���ाह प्राप्त करें"
+                      ? "कृषि विशेषज्ञों और रोग विशेषज्ञों से व्यक्तिगत सलाह प्राप्त करें"
                       : "వ్యవసాయ నిపుణులు మరియు వ్యాధి నిపుణుల నుండి వ్యక్తిగత సలహా పొందండి"}
                 </CardDescription>
               </CardHeader>
@@ -690,7 +692,7 @@ export default function HomePage() {
                     ? "Experience the Future of Smart Farming"
                     : language === "hi"
                       ? "स्मार्ट कृषि के भविष्य का अनुभव करें"
-                      : "స్మార్ట్ వ్యవసాయ భవిష్యత్తును అనుభవించండ��"}
+                      : "స్మార్ట్ వ్యవసాయ భవిష్యత్తును అనుభవించండి"}
                 </CardTitle>
               </motion.div>
               <CardDescription className="text-lg">
@@ -698,7 +700,7 @@ export default function HomePage() {
                   ? "Join thousands of farmers already using Kisan Mitra for smarter, more profitable farming"
                   : language === "hi"
                     ? "हजारों किसानों के साथ जुड़ें जो पहले से ही स्मार्ट और अधिक लाभदायक खेती के लिए किसान मित्र का उपयोग कर रहे हैं"
-                    : "స్మార్ట్, మరింత లాభదాయకమైన వ్యవసాయం కోసం ఇప్పటికే కిసాన్ మిత్రను ఉపయోగిస్తున్న వేలాది రైతులతో చేరండి"}
+                    : "స్మార్ట్, మరింత లాభదాయకమైన వ్యవసాయం కోసం ఇప్పటికే క��సాన్ మిత్రను ఉపయోగిస్తున్న వేలాది రైతులతో చేరండి"}
               </CardDescription>
             </CardHeader>
             <CardContent className="relative z-10">
@@ -721,7 +723,7 @@ export default function HomePage() {
                   },
                   {
                     number: "1000+",
-                    label: language === "en" ? "WhatsApp Groups" : language === "hi" ? "व्हाट्सएप समूह" : "వాట్సాప్ గ్రూపులు",
+                    label: language === "en" ? "WhatsApp Groups" : language === "hi" ? "व्हाट्���एप समूह" : "వాట్సాప్ గ్రూపులు",
                     color: "text-purple-600",
                   },
                   {
