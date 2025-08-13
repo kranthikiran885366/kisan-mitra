@@ -33,7 +33,7 @@ export default function VoiceAssistant({
   const defaultTranslations = {
     speak: language === 'hi' ? 'बोलें' : language === 'te' ? 'మాట్లాడండి' : 'Speak',
     speaking: language === 'hi' ? 'बोल रहा है' : language === 'te' ? 'మాట్లాడుతోంది' : 'Speaking',
-    stopSpeaking: language === 'hi' ? 'रोकें' : language === 'te' ? 'ఆపండి' : 'Stop'
+    stopSpeaking: language === 'hi' ? 'रो��ें' : language === 'te' ? 'ఆపండి' : 'Stop'
   }
 
   const t = { ...defaultTranslations, ...translations }
@@ -57,8 +57,9 @@ export default function VoiceAssistant({
   }
 
   const getPageSpecificContent = () => {
-    // Get content based on current page context
-    const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+    // Get content based on current page context - only run on client
+    if (typeof window === 'undefined') return ''
+    const currentPath = window.location.pathname
     
     switch (true) {
       case currentPath.includes('/weather'):
@@ -70,7 +71,7 @@ export default function VoiceAssistant({
       
       case currentPath.includes('/market'):
         return language === 'hi' 
-          ? 'बाजार की कीमतें और रुझान देखें।'
+          ? 'बाजार ��ी कीमतें और रुझान देखें।'
           : language === 'te' 
           ? 'మార్కెట్ ధరలు మరియు ట్రెండ్‌లను చూడండి।'
           : 'View market prices and trends.'
@@ -126,7 +127,8 @@ export default function VoiceAssistant({
     }
   }
 
-  if (!isSupported) {
+  // Don't render anything during SSR to avoid hydration mismatch
+  if (typeof window === 'undefined' || !isSupported) {
     return null
   }
 
