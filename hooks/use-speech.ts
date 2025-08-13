@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 export type SupportedLanguage = 'en' | 'hi' | 'te'
 
@@ -11,9 +11,12 @@ interface SpeechOptions {
 
 export function useSpeech() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
-  const [isSupported, setIsSupported] = useState<boolean>(
-    typeof window !== 'undefined' && 'speechSynthesis' in window
-  )
+  const [isSupported, setIsSupported] = useState<boolean>(false)
+
+  // Check for speech synthesis support only on client side
+  useEffect(() => {
+    setIsSupported(typeof window !== 'undefined' && 'speechSynthesis' in window)
+  }, [])
 
   const speak = useCallback((text: string, options?: SpeechOptions) => {
     if (!isSupported || !text.trim()) {
