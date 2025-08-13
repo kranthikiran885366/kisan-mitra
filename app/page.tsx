@@ -75,7 +75,7 @@ const translations = {
     expertGuidance: "विशेषज्ञ कृषि मार्गदर्शन",
     trustedBy: "भारत भर के किसानों द्वारा विश्वसनीय",
     successStories: "सफलता की कहानियां",
-    testimonial: "किसान मित्र ने मेरी फसल की पैदावार 40% बढ़ाने और बीमारियों का जल्दी पता लगाने में मदद की।",
+    testimonial: "किसान मित्र ने मेरी फसल की पैदावा�� 40% बढ़ाने और बीमारियों का जल्दी पता लगाने में मदद की।",
     farmerName: "राजेश कुमार, पंजाब के किसान",
   },
   te: {
@@ -205,23 +205,23 @@ export default function HomePage() {
           transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY }}
         />
 
-        {/* Floating particles */}
+        {/* Floating particles with fixed positions for SSR */}
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-green-300 rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${(i * 5.26) % 100}%`,
+              top: `${(i * 3.14) % 100}%`,
             }}
             animate={{
               y: [0, -100, 0],
               opacity: [0, 1, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 3 + (i % 3),
               repeat: Number.POSITIVE_INFINITY,
-              delay: Math.random() * 2,
+              delay: (i % 5) * 0.4,
             }}
           />
         ))}
