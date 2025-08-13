@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 import Image from "next/image"
 import VoiceAssistant from "@/components/voice-assistant"
+import ClientOnly from "@/components/client-only"
 
 const translations = {
   en: {
@@ -75,7 +76,7 @@ const translations = {
     expertGuidance: "विशेषज्ञ कृषि मार्गदर्शन",
     trustedBy: "भारत भर के किसानों द्वारा विश्वसनीय",
     successStories: "सफलता की कहानियां",
-    testimonial: "किसान मित्र ने मेरी फसल की पैदावा�� 40% बढ़ाने और बीमारियों का जल्दी पता लगाने में मदद की।",
+    testimonial: "किसान मित्र ने मेरी फसल की पैदावार 40% बढ़ाने और बीमारियों का जल्दी पता लगाने में मदद की।",
     farmerName: "राजेश कुमार, पंजाब के किसान",
   },
   te: {
@@ -632,7 +633,7 @@ export default function HomePage() {
                   {language === "en"
                     ? "Get personalized advice from agricultural experts and disease specialists"
                     : language === "hi"
-                      ? "कृषि विशेषज्ञों और रोग विशेषज्ञों से व्यक्तिगत सलाह प्राप्त करें"
+                      ? "कृषि विशेषज्ञों और रोग विशेषज्ञों से व्यक्तिगत स���ाह प्राप्त करें"
                       : "వ్యవసాయ నిపుణులు మరియు వ్యాధి నిపుణుల నుండి వ్యక్తిగత సలహా పొందండి"}
                 </CardDescription>
               </CardHeader>
@@ -689,7 +690,7 @@ export default function HomePage() {
                     ? "Experience the Future of Smart Farming"
                     : language === "hi"
                       ? "स्मार्ट कृषि के भविष्य का अनुभव करें"
-                      : "స్మార్ట్ వ్యవసాయ భవిష్యత్తును అనుభవించండి"}
+                      : "స్మార్ట్ వ్యవసాయ భవిష్యత్తును అనుభవించండ��"}
                 </CardTitle>
               </motion.div>
               <CardDescription className="text-lg">
