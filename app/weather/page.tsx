@@ -55,6 +55,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import VoiceAssistant from "@/components/voice-assistant"
+import ClientOnly from "@/components/client-only"
 
 // Types
 type WeatherData = {
@@ -475,14 +476,16 @@ export default function WeatherPage() {
               <span className={`text-sm font-medium ${!isMetric ? 'text-blue-600' : 'text-gray-500'}`}>°F</span>
             </div>
 
-            <VoiceAssistant
-              content={getWeatherContent()}
-              language={language}
-              size="sm"
-              translations={{
-                speak: translations[language]?.speakWeather || 'Speak Weather'
-              }}
-            />
+            <ClientOnly>
+              <VoiceAssistant
+                content={getWeatherContent()}
+                language={language}
+                size="sm"
+                translations={{
+                  speak: translations[language]?.speakWeather || 'Speak Weather'
+                }}
+              />
+            </ClientOnly>
             
             <div className="flex items-center space-x-2">
               <Button 
@@ -855,7 +858,7 @@ const translations = {
     backToDashboard: "डैशबोर्ड पर वापस जाएं",
   },
   te: {
-    title: "వాతావరణ నవీకరణలు",
+    title: "వాతావరణ నవ��కరణలు",
     speakWeather: "వాతావరణం వినండి",
     getWeatherSummary: (location: string, condition: string, temp: number, tempUnit: string, humidity: number, windSpeed: string, windUnit: string) =>
       `${location}లో ప్రస్తుత వాతావరణం: ${condition}, ఉష్ణోగ్రత ${temp} డిగ్రీలు ${tempUnit === 'Celsius' ? 'సెల్సియస్' : 'ఫారెన్‌హీట్'}, తేమ ${humidity} శాతం, గాలి వేగం ${windSpeed} ${windUnit === 'kilometers per hour' ? 'కిలోమీటర్లు గంటకు' : 'మైళ్లు గంటకు'}`,
@@ -871,7 +874,7 @@ const translations = {
     sunrise: "సూర్యోదయం",
     sunset: "సూర్యాస్తమయం",
     windGust: "గాలి వేగం (గస్ట్)",
-    precipitation: "వర్షపాతం",
+    precipitation: "వర్ష���ాతం",
     chanceOfRain: "వర్షపాత అవకాశం",
     hourlyForecast: "గంటవారీ అంచనా",
     dailyForecast: "రోజువారీ అంచనా",
