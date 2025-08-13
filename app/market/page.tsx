@@ -28,6 +28,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useRouter } from "next/navigation"
 import { marketApi, MarketPrice, MarketAnalysis, NearbyMarket, PriceAlert } from "@/lib/marketApi"
 import VoiceAssistant from "@/components/voice-assistant"
+import ClientOnly from "@/components/client-only"
 
 const translations = {
   en: {
@@ -145,7 +146,7 @@ const translations = {
     retry: "మళ్లీ ప్రయత్నించండి",
     refresh: "రిఫ్రెష్ చేయండి",
     priceAnalysis: "ధర విశ్లేషణ",
-    marketTrends: "మార్కెట్ ట్రెండ్స్",
+    marketTrends: "మార్కెట్ ట��రెండ్స్",
     nearbyMarkets: "సమీప మార్కెట్లు",
     alerts: "ధర అలర్ట్లు",
     forecast: "ధర అంచనా",
@@ -320,13 +321,15 @@ export default function MarketPage() {
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               {t.refresh}
             </Button>
-            <VoiceAssistant
-              content={getMarketContent()}
-              language={language}
-              translations={{
-                speak: t.speakSummary || 'Speak Summary'
-              }}
-            />
+            <ClientOnly>
+              <VoiceAssistant
+                content={getMarketContent()}
+                language={language}
+                translations={{
+                  speak: t.speakSummary || 'Speak Summary'
+                }}
+              />
+            </ClientOnly>
             <Button
               variant="outline"
               onClick={() => router.push('/dashboard')}
@@ -359,7 +362,7 @@ export default function MarketPage() {
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-purple-600">₹{stats.avgPrice}</p>
+                <p className="text-2xl font-bold text-purple-600">��{stats.avgPrice}</p>
                 <p className="text-sm text-gray-600">{t.avgPrice}</p>
               </CardContent>
             </Card>
