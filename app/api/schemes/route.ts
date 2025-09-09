@@ -253,24 +253,44 @@ export async function GET(request: NextRequest) {
       schemes = filteredSchemes.slice(startIndex, startIndex + limit)
     }
 
+    // Get categories and levels for filters
+    const categories = [
+      { id: 'financial', name: 'Financial Assistance' },
+      { id: 'insurance', name: 'Insurance' },
+      { id: 'technical', name: 'Technical Support' },
+      { id: 'credit', name: 'Credit Facilities' },
+      { id: 'subsidy', name: 'Subsidy' },
+      { id: 'training', name: 'Training' }
+    ]
+    
+    const levels = [
+      { id: 'central', name: 'Central Government' },
+      { id: 'state', name: 'State Government' },
+      { id: 'district', name: 'District Level' }
+    ]
+
     const response = {
-      schemes: paginatedSchemes,
-      categories: [
-        { id: 'financial', name: 'Financial Assistance' },
-        { id: 'insurance', name: 'Insurance' },
-        { id: 'technical', name: 'Technical Support' },
-        { id: 'credit', name: 'Credit Facilities' }
-      ],
+      schemes,
+      categories,
+      levels,
       pagination: {
         current: page,
-        total: Math.ceil(filteredSchemes.length / limit),
+        total: Math.ceil(totalSchemes / limit),
         limit,
-        totalSchemes: filteredSchemes.length
+        totalSchemes
       },
       filters: {
         category,
         level,
-        search
+        search,
+        state,
+        status,
+        featured
+      },
+      meta: {
+        activeSchemes: schemes.filter((s: any) => s.status === 'active').length,
+        featuredSchemes: schemes.filter((s: any) => s.featured).length,
+        totalAmount: schemes.reduce((sum: number, s: any) => sum + (s.amount?.max || 0), 0)
       }
     }
 
