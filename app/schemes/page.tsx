@@ -152,17 +152,66 @@ export default function SchemesPage() {
 
   const handleShare = (scheme: any, e: React.MouseEvent) => {
     e.stopPropagation()
-    const shareText = `Check out this government scheme: ${getLocalizedTitle(scheme, language)}\n\nAmount: ${scheme.amount}\nDeadline: ${formatDeadline(scheme.deadline)}\n\nApply at: ${scheme.applicationLink}`
+    const shareText = `Check out this government scheme: ${getLocalizedTitle(scheme, language)}\n\nAmount: ${scheme.amount?.description || scheme.amount}\nDeadline: ${formatDeadline(scheme.deadline)}\n\nApply at: ${scheme.applicationProcess?.url || '#'}`
     
     if (navigator.share) {
       navigator.share({
         title: getLocalizedTitle(scheme, language),
         text: shareText,
-        url: scheme.applicationLink
+        url: scheme.applicationProcess?.url || '#'
       })
     } else {
       navigator.clipboard.writeText(shareText)
       alert('Scheme details copied to clipboard!')
+    }
+  }
+
+  const checkEligibility = async (scheme: any, e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    // Mock user profile - in real app, get from user context
+    const userProfile = {
+      landSize: 2.5,
+      income: 150000,
+      age: 35,
+      category: 'General',
+      state: 'Telangana',
+      crops: ['Rice', 'Cotton']
+    }
+    
+    try {
+      const response = await fetch('/api/schemes/eligibility', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          schemeId: scheme._id || scheme.id,
+          userProfile
+        })
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        const { eligible, eligibilityScore, reasons, potentialBenefit } = result.data
+        
+        let message = `Eligibility Check: ${getLocalizedTitle(scheme, language)}\n\n`
+        message += `Status: ${eligible ? '✅ ELIGIBLE' : '❌ NOT ELIGIBLE'}\n`
+        message += `Score: ${eligibilityScore}/100\n\n`
+        
+        if (potentialBenefit > 0) {
+          message += `Potential Benefit: ₹${potentialBenefit.toLocaleString()}\n\n`
+        }
+        
+        if (reasons.length > 0) {
+          message += `Details:\n${reasons.join('\n')}\n\n`
+        }
+        
+        message += eligible ? 'You can apply for this scheme!' : 'Check other available schemes.'
+        
+        alert(message)
+      }
+    } catch (error) {
+      alert('Error checking eligibility. Please try again.')
     }
   }
 
@@ -190,7 +239,8 @@ export default function SchemesPage() {
       const filters: SchemeFilters = {
         language,
         limit: 20,
-        page: 1
+        page: 1,
+        sortBy
       }
       
       if (selectedCategory !== "all") filters.category = selectedCategory
@@ -199,9 +249,19 @@ export default function SchemesPage() {
       
       const data = await schemesApi.getSchemes(filters)
       setSchemes(data.schemes || [])
+      
+      // Update real-time statistics
+      console.log(`📊 Loaded ${data.schemes?.length || 0} schemes`)
+      console.log(`💰 Total potential benefits: ₹${data.meta?.totalAmount?.toLocaleString() || 0}`)
+      
     } catch (err) {
       console.error("Error fetching schemes:", err)
       setError(err instanceof Error ? err.message : "Failed to load schemes")
+      
+      // Show user-friendly error with retry option
+      if (err instanceof Error && err.message.includes('network')) {
+        setError('Network error. Please check your connection and try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -491,12 +551,26 @@ export default function SchemesPage() {
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center text-green-600">
                         <IndianRupee className="h-4 w-4 mr-1" />
-                        <span className="font-semibold">{scheme.amount}</span>
+                        <span className="font-semibold">
+                          {scheme.amount?.description || scheme.amount || 'Amount varies'}
+                        </span>
                       </div>
                       <div className="flex items-center text-gray-500">
                         <Users className="h-4 w-4 mr-1" />
-                        <span>{scheme.eligibility}</span>
+                        <span>{scheme.eligibility?.category?.join(', ') || scheme.eligibility || 'All farmers'}</span>
                       </div>
+                    </div>
+
+                    {/* Real-time eligibility check */}
+                    <div className="mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                        onClick={(e) => checkEligibility(scheme, e)}
+                      >
+                        🔍 Check My Eligibility
+                      </Button>
                     </div>
 
                     <div className="space-y-2">
@@ -548,8 +622,25 @@ export default function SchemesPage() {
                       size="sm" 
                       className="flex-1"
                       onClick={() => {
-                        if (confirm(`Apply for ${getLocalizedTitle(scheme, language)}?\n\nThis will redirect you to the official application portal.`)) {
-                          window.open(scheme.applicationLink, '_blank')
+                        const applicationUrl = scheme.applicationProcess?.url || scheme.applicationLink || '#'
+                        const steps = scheme.applicationProcess?.steps || []
+                        
+                        let message = `Apply for ${getLocalizedTitle(scheme, language)}?\n\n`
+                        message += `💰 Amount: ${scheme.amount?.description || scheme.amount}\n`
+                        message += `📅 Deadline: ${formatDeadline(scheme.deadline)}\n\n`
+                        
+                        if (steps.length > 0) {
+                          message += `Application Steps:\n${steps.slice(0, 3).map((step: string, i: number) => `${i + 1}. ${step}`).join('\n')}\n\n`
+                        }
+                        
+                        message += 'This will redirect you to the official portal.'
+                        
+                        if (confirm(message)) {
+                          if (applicationUrl !== '#') {
+                            window.open(applicationUrl, '_blank')
+                          } else {
+                            alert('Application portal will be available soon. Please check back later.')
+                          }
                         }
                       }}
                     >

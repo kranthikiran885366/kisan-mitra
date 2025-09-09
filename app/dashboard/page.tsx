@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
+import { useAuth, useLanguage } from "@/lib/contexts"
 import {
   Cloud,
   TrendingUp,
@@ -461,43 +462,32 @@ const schemes = [
 ]
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null)
-  const [language, setLanguage] = useState<"en" | "hi" | "te">("en")
+  const { user, logout, loading } = useAuth()
+  const { currentLanguage, speak, stopSpeaking } = useLanguage()
   const [activeTab, setActiveTab] = useState("dashboard")
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()
-  const t = translations[language]
+  const t = translations[currentLanguage]
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (!userData) {
+    if (!loading && !user) {
       router.push("/auth/login")
-      return
     }
-    const parsedUser = JSON.parse(userData)
-    setUser(parsedUser)
-    setLanguage(parsedUser.language || "en")
-  }, [router])
+  }, [user, loading, router])
 
   const handleLogout = () => {
-    localStorage.removeItem("user")
-    router.push("/")
+    logout()
   }
 
   const speakText = (text: string) => {
-    if ("speechSynthesis" in window) {
-      speechSynthesis.cancel()
-      const utterance = new SpeechSynthesisUtterance(text)
-      utterance.lang = language === "en" ? "en-US" : language === "hi" ? "hi-IN" : "te-IN"
-      speechSynthesis.speak(utterance)
-      setIsSpeaking(true)
-      utterance.onend = () => setIsSpeaking(false)
-    }
+    speak(text)
+    setIsSpeaking(true)
+    setTimeout(() => setIsSpeaking(false), 3000)
   }
 
-  const stopSpeaking = () => {
-    speechSynthesis.cancel()
+  const handleStopSpeaking = () => {
+    stopSpeaking()
     setIsSpeaking(false)
   }
 
@@ -589,8 +579,10 @@ export default function DashboardPage() {
             </div>
 
             <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as "en" | "hi" | "te")}
+              value={currentLanguage}
+              onChange={(e) => {
+                // Language change will be handled by LanguageContext
+              }}
               className="w-full px-3 py-1 rounded-lg border border-green-300 bg-white mb-2 text-sm"
             >
               <option value="en">English</option>
@@ -634,7 +626,7 @@ export default function DashboardPage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={isSpeaking ? stopSpeaking : () => speakText("Voice assistant ready")}
+                onClick={isSpeaking ? handleStopSpeaking : () => speakText("Voice assistant ready")}
               >
                 {isSpeaking ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </Button>
@@ -642,8 +634,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Profile Tab */}
-          {activeTab === "profile" && (
-            <ProfileSetup user={user} setUser={setUser} language={language} />
+          {activeTab === "profile" && user && (
+            <ProfileSetup user={user} setUser={() => {}} language={currentLanguage} />
           )}
 
           {/* Dashboard Tab */}

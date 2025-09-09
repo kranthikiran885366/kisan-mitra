@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import BottomNavigation from "@/components/BottomNavigation"
+import { Providers } from "@/components/providers/Providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -37,8 +38,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Krishi Mitra" />
       </head>
       <body className={inter.className}>
-        {children}
-        <BottomNavigation />
+        <Providers>
+          {children}
+          <BottomNavigation />
+        </Providers>
       </body>
     </html>
   )
