@@ -237,7 +237,7 @@ export default function CommunityPage() {
   const [language, setLanguage] = useState<'en' | 'hi' | 'te'>('en')
   const [activeTab, setActiveTab] = useState("feed")
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
   
   // Data states
   const [posts, setPosts] = useState<CommunityPost[]>([])
@@ -605,7 +605,7 @@ export default function CommunityPage() {
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t.general}</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="crops">{t.crops}</SelectItem>
                 <SelectItem value="livestock">{t.livestock}</SelectItem>
                 <SelectItem value="equipment">{t.equipment}</SelectItem>
