@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
-import { useAuth } from "./AuthContext"
+import { AuthContext } from "./AuthContext"
 
 interface LanguageContextType {
   currentLanguage: "en" | "hi" | "te"
@@ -28,27 +28,27 @@ export const useLanguage = () => {
 }
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const { user, updateProfile } = useAuth()
+  const authContext = useContext(AuthContext)
   const [currentLanguage, setCurrentLanguage] = useState<"en" | "hi" | "te">("en")
   const [voiceEnabled, setVoiceEnabled] = useState(true)
 
   useEffect(() => {
-    if (user?.preferences?.language) {
-      setCurrentLanguage(user.preferences.language as "en" | "hi" | "te")
+    if (authContext?.user?.preferences?.language) {
+      setCurrentLanguage(authContext.user.preferences.language as "en" | "hi" | "te")
     }
-    if (typeof user?.preferences?.voiceEnabled === "boolean") {
-      setVoiceEnabled(user.preferences.voiceEnabled)
+    if (typeof authContext?.user?.preferences?.voiceEnabled === "boolean") {
+      setVoiceEnabled(authContext.user.preferences.voiceEnabled)
     }
-  }, [user])
+  }, [authContext?.user])
 
   const changeLanguage = async (language: "en" | "hi" | "te") => {
     try {
       setCurrentLanguage(language)
 
-      if (user) {
-        await updateProfile({
+      if (authContext?.user && authContext?.updateProfile) {
+        await authContext.updateProfile({
           preferences: {
-            ...user.preferences,
+            ...authContext.user.preferences,
             language,
           },
         })
@@ -62,10 +62,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const newVoiceEnabled = !voiceEnabled
     setVoiceEnabled(newVoiceEnabled)
 
-    if (user) {
-      await updateProfile({
+    if (authContext?.user && authContext?.updateProfile) {
+      await authContext.updateProfile({
         preferences: {
-          ...user.preferences,
+          ...authContext.user.preferences,
           voiceEnabled: newVoiceEnabled,
         },
       })
