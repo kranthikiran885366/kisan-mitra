@@ -22,6 +22,22 @@ api.interceptors.request.use(
   }
 );
 
+// Response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear invalid token
+      localStorage.removeItem('token');
+      // Optionally redirect to login
+      if (typeof window !== 'undefined') {
+        console.warn('Authentication required. Please log in.');
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 const apiCall = async (endpoint: string, options: any = {}) => {
   try {
     const response = await api({

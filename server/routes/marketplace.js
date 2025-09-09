@@ -3,8 +3,8 @@ const auth = require("../middleware/auth")
 
 const router = express.Router()
 
-// Get all products
-router.get("/products", auth, async (req, res) => {
+// Get all products (public access)
+router.get("/products", async (req, res) => {
   try {
     const products = [
       { id: 1, cropName: "Rice", price: 2500, farmer: "John Doe", location: "Guntur" },
