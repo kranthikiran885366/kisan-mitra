@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, FileText, Calendar, ArrowRight, Filter, ExternalLink, Clock, Users, IndianRupee } from "lucide-react"
+import { Search, FileText, Calendar, ArrowRight, Filter, ExternalLink, Clock, Users, IndianRupee, Bookmark, Share2, Heart } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
@@ -133,13 +133,54 @@ export default function SchemesPage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedLevel, setSelectedLevel] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
+  const [bookmarkedSchemes, setBookmarkedSchemes] = useState<Set<string>>(new Set())
   const router = useRouter()
   const t = translations[language]
+
+  const handleBookmark = (schemeId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const newBookmarks = new Set(bookmarkedSchemes)
+    if (newBookmarks.has(schemeId)) {
+      newBookmarks.delete(schemeId)
+      alert('Scheme removed from bookmarks!')
+    } else {
+      newBookmarks.add(schemeId)
+      alert('Scheme bookmarked successfully!')
+    }
+    setBookmarkedSchemes(newBookmarks)
+  }
+
+  const handleShare = (scheme: any, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const shareText = `Check out this government scheme: ${getLocalizedTitle(scheme, language)}\n\nAmount: ${scheme.amount}\nDeadline: ${formatDeadline(scheme.deadline)}\n\nApply at: ${scheme.applicationLink}`
+    
+    if (navigator.share) {
+      navigator.share({
+        title: getLocalizedTitle(scheme, language),
+        text: shareText,
+        url: scheme.applicationLink
+      })
+    } else {
+      navigator.clipboard.writeText(shareText)
+      alert('Scheme details copied to clipboard!')
+    }
+  }
 
   // Fetch schemes from API
   useEffect(() => {
     fetchSchemes()
   }, [selectedCategory, selectedLevel, language])
+
+  // Real-time search with debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm !== '') {
+        fetchSchemes()
+      }
+    }, 500)
+    
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm])
 
   const fetchSchemes = async () => {
     try {
@@ -377,15 +418,64 @@ export default function SchemesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
-                <Card className="h-full hover:shadow-lg transition-shadow duration-300 border-l-4 border-l-green-500">
+                <Card 
+                  className="h-full hover:shadow-lg transition-shadow duration-300 border-l-4 border-l-green-500 cursor-pointer"
+                  onClick={() => {
+                    console.log('Scheme clicked:', scheme.title)
+                  }}
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between mb-2">
-                      <Badge className={getStatusBadge(scheme.status)}>
+                      <Badge 
+                        className={`${getStatusBadge(scheme.status)} cursor-pointer hover:opacity-80`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          const statusInfo = {
+                            active: 'This scheme is currently accepting applications',
+                            new: 'This is a newly launched scheme',
+                            featured: 'This scheme is specially recommended for you'
+                          }
+                          alert(`Status: ${scheme.status.toUpperCase()}\n\n${statusInfo[scheme.status as keyof typeof statusInfo] || 'Scheme status information'}`)
+                        }}
+                      >
                         {t[scheme.status as keyof typeof t] || scheme.status}
                       </Badge>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {formatDeadline(scheme.deadline)}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={(e) => handleBookmark(scheme.id, e)}
+                        >
+                          <Bookmark 
+                            className={`h-4 w-4 ${
+                              bookmarkedSchemes.has(scheme.id) 
+                                ? 'fill-yellow-400 text-yellow-400' 
+                                : 'text-gray-400 hover:text-yellow-400'
+                            }`} 
+                          />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={(e) => handleShare(scheme, e)}
+                        >
+                          <Share2 className="h-4 w-4 text-gray-400 hover:text-blue-400" />
+                        </Button>
+                        <div 
+                          className="flex items-center text-sm text-gray-500 cursor-pointer hover:text-gray-700"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            const deadline = new Date(scheme.deadline)
+                            const today = new Date()
+                            const daysLeft = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+                            alert(`Application Deadline\n\nLast Date: ${deadline.toLocaleDateString()}\nDays Remaining: ${daysLeft > 0 ? daysLeft : 'Expired'}\n\nDon't miss the deadline!`)
+                          }}
+                        >
+                          <Clock className="h-4 w-4 mr-1" />
+                          {formatDeadline(scheme.deadline)}
+                        </div>
                       </div>
                     </div>
                     <CardTitle className="text-lg leading-tight">
@@ -414,12 +504,27 @@ export default function SchemesPage() {
                         <span className="font-medium text-gray-700">{t.documentsRequired}:</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {scheme.documents.slice(0, 3).map((doc, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
+                            <Badge 
+                              key={idx} 
+                              variant="secondary" 
+                              className="text-xs cursor-pointer hover:bg-gray-200"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                alert(`Document Required: ${doc}\n\nThis document is mandatory for the application process.`)
+                              }}
+                            >
                               {doc}
                             </Badge>
                           ))}
                           {scheme.documents.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge 
+                              variant="secondary" 
+                              className="text-xs cursor-pointer hover:bg-gray-200"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                alert(`All Required Documents:\n\n${scheme.documents.join('\n')}`)
+                              }}
+                            >
                               +{scheme.documents.length - 3} more
                             </Badge>
                           )}
@@ -429,13 +534,24 @@ export default function SchemesPage() {
                   </CardContent>
 
                   <CardFooter className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => {
+                        alert(`Viewing details for: ${getLocalizedTitle(scheme, language)}\n\nEligibility: ${scheme.eligibility}\nBenefits: ${scheme.benefits}\nDocuments: ${scheme.documents.join(', ')}\n\nDeadline: ${formatDeadline(scheme.deadline)}`)
+                      }}
+                    >
                       {t.viewDetails}
                     </Button>
                     <Button 
                       size="sm" 
                       className="flex-1"
-                      onClick={() => window.open(scheme.applicationLink, '_blank')}
+                      onClick={() => {
+                        if (confirm(`Apply for ${getLocalizedTitle(scheme, language)}?\n\nThis will redirect you to the official application portal.`)) {
+                          window.open(scheme.applicationLink, '_blank')
+                        }
+                      }}
                     >
                       {t.applyNow}
                       <ExternalLink className="h-4 w-4 ml-1" />
@@ -448,9 +564,17 @@ export default function SchemesPage() {
         )}
 
         {/* Load More Button */}
-        {filteredSchemes.length > 0 && (
+        {filteredSchemes.length > 0 && filteredSchemes.length >= 6 && (
           <div className="text-center mt-8">
-            <Button variant="outline" size="lg">
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={() => {
+                alert('Loading more schemes...\n\nThis would typically fetch more data from the server.')
+                // In a real app, this would load more schemes
+                console.log('Loading more schemes...')
+              }}
+            >
               Load More Schemes
             </Button>
           </div>

@@ -1,189 +1,270 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from 'next/server'
+import { connectDB } from '@/lib/mongodb'
+import mongoose from 'mongoose'
 
-// Mock government schemes data with comprehensive information
-const mockSchemesData = {
-  schemes: [
-    {
-      id: "pm-kisan",
-      title: "PM-KISAN Scheme",
-      titleHi: "पीएम-किसान योजना",
-      titleTe: "పిఎం-కిసాన్ పథకం",
-      description: "Direct income support to farmers providing ₹6000 per year in three equal installments",
-      descriptionHi: "किसानों को प्रत्यक्ष आय सहायता - ₹6000 प्रति वर्ष तीन समान किस्तों में",
-      descriptionTe: "రైతులకు ప్రత్యక్ష ఆదాయ మద్దతు - సంవత్సరానికి ₹6000 మూడు సమాన వాయిదాలలో",
-      amount: "₹6,000/year",
-      deadline: "2024-12-31",
-      status: "featured",
-      category: "financial",
-      level: "central",
-      eligibility: "Small and marginal farmers",
-      documents: ["Aadhaar Card", "Bank Account", "Land Records", "Passport Photo"],
-      applicationLink: "https://pmkisan.gov.in",
-      benefits: "Direct cash transfer to bank account, No middleman involvement, Quick processing",
-      howToApply: "Visit official website, Fill online form, Upload documents, Submit application"
-    },
-    {
-      id: "crop-insurance",
-      title: "Pradhan Mantri Fasal Bima Yojana",
-      titleHi: "प्रधानमंत्री फसल बीमा योजना",
-      titleTe: "ప్రధానమంత్రి ఫసల్ బీమా యోజన",
-      description: "Comprehensive crop insurance scheme providing coverage against crop loss due to natural calamities, pests & diseases",
-      descriptionHi: "प्राकृतिक आपदाओं, कीटों और बीमारियों के कारण फसल हानि के विरुद्ध व्यापक फसल बीमा योजना",
-      descriptionTe: "ప్రకృతి వైపరీత్యాలు, కీటకాలు మరియు వ్యాధుల వల్ల పంట నష్టానికి వ్యతిరేకంగా సమగ్ర పంట బీమా పథకం",
-      amount: "Up to ₹2,00,000 coverage",
-      deadline: "2024-07-15",
-      status: "new",
-      category: "insurance",
-      level: "central",
-      eligibility: "All farmers (owner/tenant)",
-      documents: ["Aadhaar Card", "Bank Account", "Land Records", "Sowing Certificate", "Revenue Records"],
-      applicationLink: "https://pmfby.gov.in",
-      benefits: "Low premium rates, Quick claim settlement, Coverage for all stages of crop cycle",
-      howToApply: "Register on PMFBY portal, Select crop and area, Pay premium, Get policy document"
-    },
-    {
-      id: "soil-health",
-      title: "Soil Health Card Scheme",
-      titleHi: "मृदा स्वास्थ्य कार्ड योजना",
-      titleTe: "మట్టి ఆరోగ్య కార్డ్ పథకం",
-      description: "Free soil testing and nutrient-based fertilizer recommendations to improve soil health and crop productivity",
-      descriptionHi: "मिट्टी के स्वास्थ्य और फसल उत्पादकता में सुधार के लिए मुफ्त मिट्टी परीक्षण और पोषक तत्व आधारित उर्वरक सिफारिशें",
-      descriptionTe: "మట్టి ఆరోగ్యం మరియు పంట ఉత్పాదకతను మెరుగుపరచడానికి ఉచిత మట్టి పరీక్ష మరియు పోషక మూలకాల ఆధారిత ఎరువుల సిఫార్సులు",
-      amount: "Free Service",
-      deadline: "2024-09-30",
-      status: "active",
-      category: "technical",
-      level: "central",
-      eligibility: "All farmers",
-      documents: ["Aadhaar Card", "Land Records", "Mobile Number"],
-      applicationLink: "https://soilhealth.dac.gov.in",
-      benefits: "Free soil testing, Customized fertilizer recommendations, Improved crop yield",
-      howToApply: "Contact local agriculture office, Provide soil samples, Receive soil health card"
-    },
-    {
-      id: "kisan-credit",
-      title: "Kisan Credit Card (KCC)",
-      titleHi: "किसान क्रेडिट कार्ड",
-      titleTe: "కిసాన్ క్రెడిట్ కార్డ్",
-      description: "Credit facility for agricultural and allied activities at subsidized interest rates with flexible repayment",
-      descriptionHi: "लचीली चुकौती के साथ सब्सिडी वाली ब्याज दरों पर कृषि और संबद्ध गतिविधियों के लिए ऋण सुविधा",
-      descriptionTe: "సరళమైన తిరిగి చెల్లింపుతో రాయితీ వడ్డీ రేట్లలో వ్యవసాయ మరియు అనుబంధ కార్యకలాపాలకు రుణ సౌకర్యం",
-      amount: "Up to ₹3,00,000",
-      deadline: "2024-08-31",
-      status: "active",
-      category: "credit",
-      level: "central",
-      eligibility: "Farmers with land ownership/tenancy",
-      documents: ["Aadhaar Card", "PAN Card", "Land Records", "Bank Account", "Income Certificate"],
-      applicationLink: "https://kcc.gov.in",
-      benefits: "Low interest rates, No collateral for loans up to ₹1.6L, Flexible repayment",
-      howToApply: "Visit nearest bank branch, Fill KCC application form, Submit documents, Get card after approval"
-    },
-    {
-      id: "organic-farming",
-      title: "Paramparagat Krishi Vikas Yojana",
-      titleHi: "परंपरागत कृषि विकास योजना",
-      titleTe: "పరంపరాగత కృషి వికాస్ యోజన",
-      description: "Promotion of organic farming through cluster approach and certification support",
-      descriptionHi: "क्लस्टर दृष्टिकोण और प्रमाणन सहायता के माध्यम से जैविक खेती को बढ़ावा",
-      descriptionTe: "క్లస్టర్ విధానం మరియు ధృవీకరణ మద్దతు ద్వారా సేంద్రీయ వ్యవసాయాన్ని ప్రోత్సహించడం",
-      amount: "₹50,000/hectare",
-      deadline: "2024-10-15",
-      status: "active",
-      category: "technical",
-      level: "central",
-      eligibility: "Farmers interested in organic farming",
-      documents: ["Aadhaar Card", "Land Records", "Bank Account", "Group Formation Certificate"],
-      applicationLink: "https://pgsindia-ncof.gov.in",
-      benefits: "Financial assistance for organic inputs, Certification support, Premium prices for organic produce",
-      howToApply: "Form farmer groups, Register with implementing agency, Submit cluster plan, Get approval"
-    },
-    {
-      id: "drip-irrigation",
-      title: "Micro Irrigation Scheme",
-      titleHi: "सूक्ष्म सिंचाई योजना",
-      titleTe: "మైక్రో ఇరిగేషన్ పథకం",
-      description: "Subsidy for drip and sprinkler irrigation systems to promote water-efficient farming",
-      descriptionHi: "जल-कुशल खेती को बढ़ावा देने के लिए ड्रिप और स्प्रिंकलर सिंचाई प्रणालियों के लिए सब्सिडी",
-      descriptionTe: "నీటి-సమర్థవంతమైన వ్యవసాయాన్ని ప్రోత్సహించడానికి డ్రిప్ మరియు స్ప్రింక్లర్ నీటిపారుదల వ్యవస్థలకు రాయితీ",
-      amount: "55% subsidy (90% for SC/ST)",
-      deadline: "2024-11-30",
-      status: "featured",
-      category: "technical",
-      level: "central",
-      eligibility: "All categories of farmers",
-      documents: ["Aadhaar Card", "Land Records", "Bank Account", "Water Source Certificate", "Quotation"],
-      applicationLink: "https://pmksy.gov.in",
-      benefits: "Water saving up to 50%, Increased crop yield, Reduced labor cost",
-      howToApply: "Apply through agriculture department, Get technical approval, Install system, Claim subsidy"
+// Scheme model
+const schemeSchema = new mongoose.Schema({
+  schemeId: String,
+  title: String,
+  titleHi: String,
+  titleTe: String,
+  description: String,
+  descriptionHi: String,
+  descriptionTe: String,
+  category: String,
+  level: String,
+  ministry: String,
+  deadline: Date,
+  amount: {
+    min: Number,
+    max: Number,
+    unit: String,
+    description: String
+  },
+  eligibility: {
+    landSize: { min: Number, max: Number },
+    category: [String],
+    state: [String]
+  },
+  benefits: [String],
+  documents: [String],
+  applicationProcess: {
+    online: Boolean,
+    url: String,
+    steps: [String]
+  },
+  status: String,
+  featured: Boolean,
+  applicationCount: Number,
+  successRate: Number,
+  tags: [String]
+}, { timestamps: true })
+
+const Scheme = mongoose.models.Scheme || mongoose.model('Scheme', schemeSchema)
+
+const mockSchemes = [
+  {
+    id: '1',
+    title: 'PM-KISAN Samman Nidhi',
+    titleHi: 'पीएम-किसान सम्मान निधि',
+    titleTe: 'పిఎం-కిసాన్ సమ్మాన్ నిధి',
+    description: 'Direct income support of ₹6,000 per year to small and marginal farmers',
+    descriptionHi: 'छोटे और सीमांत किसानों को प्रति वर्ष ₹6,000 की प्रत्यक्ष आय सहायता',
+    descriptionTe: 'చిన్న మరియు సరిహద్దు రైతులకు సంవత్సరానికి ₹6,000 ప్రత్యక్ష ఆదాయ మద్దతు',
+    amount: '₹6,000/year',
+    deadline: '2024-12-31',
+    status: 'active',
+    category: 'financial',
+    level: 'central',
+    eligibility: 'Small & Marginal Farmers',
+    documents: ['Aadhaar Card', 'Bank Account', 'Land Records', 'Mobile Number'],
+    applicationLink: 'https://pmkisan.gov.in/',
+    benefits: 'Direct cash transfer in 3 installments'
+  },
+  {
+    id: '2',
+    title: 'Pradhan Mantri Fasal Bima Yojana',
+    titleHi: 'प्रधानमंत्री फसल बीमा योजना',
+    titleTe: 'ప్రధానమంత్రి ఫసల్ బీమా యోజన',
+    description: 'Crop insurance scheme providing financial support against crop loss',
+    descriptionHi: 'फसल हानि के विरुद्ध वित्तीय सहायता प्रदान करने वाली फसल बीमा योजना',
+    descriptionTe: 'పంట నష్టానికి వ్యతిరేకంగా ఆర్థిక మద్దతు అందించే పంట బీమా పథకం',
+    amount: 'Up to ₹2 Lakh',
+    deadline: '2024-11-30',
+    status: 'featured',
+    category: 'insurance',
+    level: 'central',
+    eligibility: 'All Farmers',
+    documents: ['Aadhaar Card', 'Bank Account', 'Land Records', 'Sowing Certificate'],
+    applicationLink: 'https://pmfby.gov.in/',
+    benefits: 'Comprehensive risk cover for crops'
+  },
+  {
+    id: '3',
+    title: 'Kisan Credit Card',
+    titleHi: 'किसान क्रेडिट कार्ड',
+    titleTe: 'కిసాన్ క్రెడిట్ కార్డ్',
+    description: 'Credit facility for farmers to meet agricultural expenses',
+    descriptionHi: 'कृषि व्यय को पूरा करने के लिए किसानों के लिए ऋण सुविधा',
+    descriptionTe: 'వ్యవసాయ ఖర్చులను తీర్చడానికి రైతులకు రుణ సౌకర్యం',
+    amount: 'Up to ₹3 Lakh',
+    deadline: '2024-12-15',
+    status: 'active',
+    category: 'credit',
+    level: 'central',
+    eligibility: 'Farmers with Land Records',
+    documents: ['Aadhaar Card', 'PAN Card', 'Land Records', 'Income Certificate'],
+    applicationLink: 'https://www.nabard.org/kcc.aspx',
+    benefits: 'Low interest rate, flexible repayment'
+  },
+  {
+    id: '4',
+    title: 'Soil Health Card Scheme',
+    titleHi: 'मृदा स्वास्थ्य कार्ड योजना',
+    titleTe: 'మట్టి ఆరోగ్య కార్డ్ పథకం',
+    description: 'Free soil testing and nutrient management recommendations',
+    descriptionHi: 'मुफ्त मिट्टी परीक्षण और पोषक तत्व प्रबंधन सिफारिशें',
+    descriptionTe: 'ఉచిత మట్టి పరీక్ష మరియు పోషక నిర్వహణ సిఫార్సులు',
+    amount: 'Free Service',
+    deadline: '2024-10-31',
+    status: 'new',
+    category: 'technical',
+    level: 'central',
+    eligibility: 'All Farmers',
+    documents: ['Aadhaar Card', 'Land Records'],
+    applicationLink: 'https://soilhealth.dac.gov.in/',
+    benefits: 'Improved soil fertility and crop yield'
+  },
+  {
+    id: '5',
+    title: 'Rythu Bandhu Scheme',
+    titleHi: 'रायथु बंधु योजना',
+    titleTe: 'రైతు బంధు పథకం',
+    description: 'Telangana state investment support scheme for farmers',
+    descriptionHi: 'किसानों के लिए तेलंगाना राज्य निवेश सहायता योजना',
+    descriptionTe: 'రైతులకు తెలంగాణ రాష్ట్र పెట్టుబడి మద్दతు పథకం',
+    amount: '₹10,000/acre',
+    deadline: '2024-11-15',
+    status: 'active',
+    category: 'financial',
+    level: 'state',
+    eligibility: 'Telangana Farmers',
+    documents: ['Aadhaar Card', 'Land Records', 'Bank Account', 'Residence Proof'],
+    applicationLink: 'https://rythubandhu.telangana.gov.in/',
+    benefits: 'Direct investment support per acre'
+  },
+  {
+    id: '6',
+    title: 'Organic Farming Promotion',
+    titleHi: 'जैविक खेती प्रोत्साहन',
+    titleTe: 'సేంద్రీయ వ్యవసాయ ప్రోత్సాహం',
+    description: 'Financial assistance for organic farming practices and certification',
+    descriptionHi: 'जैविक खेती प्रथाओं और प्रमाणन के लिए वित्तीय सहायता',
+    descriptionTe: 'సేంద్రీయ వ్యవసాయ పద్ధతులు మరియు ధృవీకరణకు ఆర్థిక సహాయం',
+    amount: '₹50,000/hectare',
+    deadline: '2024-12-20',
+    status: 'featured',
+    category: 'technical',
+    level: 'central',
+    eligibility: 'Progressive Farmers',
+    documents: ['Aadhaar Card', 'Land Records', 'Training Certificate'],
+    applicationLink: 'https://pgsindia-ncof.gov.in/',
+    benefits: 'Premium prices for organic produce'
+  }
+]
+
+export async function GET(request: NextRequest) {
+  try {
+    await connectDB()
+    
+    const { searchParams } = new URL(request.url)
+    const category = searchParams.get('category')
+    const level = searchParams.get('level')
+    const search = searchParams.get('search')
+    const state = searchParams.get('state')
+    const status = searchParams.get('status') || 'active'
+    const featured = searchParams.get('featured')
+    const sortBy = searchParams.get('sortBy') || 'deadline'
+    const language = searchParams.get('language') || 'en'
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const page = parseInt(searchParams.get('page') || '1')
+
+    // Build filter object
+    const filter: any = {}
+    
+    if (category && category !== 'all') filter.category = category
+    if (level && level !== 'all') filter.level = level
+    if (status && status !== 'all') filter.status = status
+    if (featured === 'true') filter.featured = true
+    if (state) filter['eligibility.state'] = { $in: [state, 'All States'] }
+
+    // Search functionality
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { titleHi: { $regex: search, $options: 'i' } },
+        { titleTe: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } }
+      ]
     }
-  ],
-  categories: [
-    { id: "financial", name: "Financial Support", nameHi: "वित्तीय सहायता", nameTe: "ఆర్థిక మద్దతు" },
-    { id: "insurance", name: "Insurance", nameHi: "बीमा", nameTe: "బీమా" },
-    { id: "technical", name: "Technical Support", nameHi: "तकनीकी सहायता", nameTe: "సాంకేతిక మద్దతు" },
-    { id: "credit", name: "Credit Facilities", nameHi: "ऋण सुविधाएं", nameTe: "రుణ సౌకర్యాలు" },
-  ],
-}
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const category = searchParams.get("category")
-  const level = searchParams.get("level")
-  const search = searchParams.get("search")
-  const language = searchParams.get("language") || "en"
-  const limit = parseInt(searchParams.get("limit") || "20")
-  const page = parseInt(searchParams.get("page") || "1")
+    // Sort options
+    let sortOptions: any = {}
+    switch (sortBy) {
+      case 'deadline':
+        sortOptions = { deadline: 1 }
+        break
+      case 'newest':
+        sortOptions = { createdAt: -1 }
+        break
+      case 'popular':
+        sortOptions = { applicationCount: -1 }
+        break
+      case 'amount':
+        sortOptions = { 'amount.max': -1 }
+        break
+      default:
+        sortOptions = { deadline: 1 }
+    }
 
-  let filteredSchemes = [...mockSchemesData.schemes]
-
-  // Filter by category
-  if (category && category !== "all") {
-    filteredSchemes = filteredSchemes.filter((scheme) => scheme.category === category)
-  }
-
-  // Filter by level
-  if (level && level !== "all") {
-    filteredSchemes = filteredSchemes.filter((scheme) => scheme.level === level)
-  }
-
-  // Search filter
-  if (search) {
-    const searchLower = search.toLowerCase()
-    filteredSchemes = filteredSchemes.filter((scheme) => {
-      const title = scheme.title.toLowerCase()
-      const description = scheme.description.toLowerCase()
-      const titleHi = scheme.titleHi?.toLowerCase() || ""
-      const titleTe = scheme.titleTe?.toLowerCase() || ""
-      const descriptionHi = scheme.descriptionHi?.toLowerCase() || ""
-      const descriptionTe = scheme.descriptionTe?.toLowerCase() || ""
+    // Try database first, fallback to mock data
+    let schemes, totalSchemes
+    try {
+      const skip = (page - 1) * limit
+      schemes = await Scheme.find(filter)
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit)
+        .lean()
       
-      return title.includes(searchLower) || 
-             description.includes(searchLower) ||
-             titleHi.includes(searchLower) ||
-             titleTe.includes(searchLower) ||
-             descriptionHi.includes(searchLower) ||
-             descriptionTe.includes(searchLower)
-    })
-  }
+      totalSchemes = await Scheme.countDocuments(filter)
+      
+      // If no schemes in database, use mock data
+      if (schemes.length === 0) {
+        throw new Error('No schemes in database, using mock data')
+      }
+    } catch (dbError) {
+      console.log('Using mock data:', dbError.message)
+      
+      // Fallback to mock data with filtering
+      let filteredSchemes = [...mockSchemes]
+      
+      if (category && category !== 'all') {
+        filteredSchemes = filteredSchemes.filter(scheme => scheme.category === category)
+      }
+      
+      if (level && level !== 'all') {
+        filteredSchemes = filteredSchemes.filter(scheme => scheme.level === level)
+      }
+      
+      if (search) {
+        const searchLower = search.toLowerCase()
+        filteredSchemes = filteredSchemes.filter(scheme => 
+          scheme.title.toLowerCase().includes(searchLower) ||
+          scheme.description.toLowerCase().includes(searchLower) ||
+          (scheme.titleHi && scheme.titleHi.includes(search)) ||
+          (scheme.titleTe && scheme.titleTe.includes(search))
+        )
+      }
+      
+      totalSchemes = filteredSchemes.length
+      const startIndex = (page - 1) * limit
+      schemes = filteredSchemes.slice(startIndex, startIndex + limit)
+    }
 
-  // Pagination
-  const startIndex = (page - 1) * limit
-  const endIndex = startIndex + limit
-  const paginatedSchemes = filteredSchemes.slice(startIndex, endIndex)
-
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 300))
-
-  return NextResponse.json({
-    success: true,
-    data: {
+    const response = {
       schemes: paginatedSchemes,
-      categories: mockSchemesData.categories,
+      categories: [
+        { id: 'financial', name: 'Financial Assistance' },
+        { id: 'insurance', name: 'Insurance' },
+        { id: 'technical', name: 'Technical Support' },
+        { id: 'credit', name: 'Credit Facilities' }
+      ],
       pagination: {
         current: page,
         total: Math.ceil(filteredSchemes.length / limit),
-        limit: limit,
+        limit,
         totalSchemes: filteredSchemes.length
       },
       filters: {
@@ -191,47 +272,20 @@ export async function GET(request: Request) {
         level,
         search
       }
-    },
-    language: language,
-    timestamp: new Date().toISOString(),
-  })
-}
+    }
 
-// POST endpoint for scheme applications
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    const { schemeId, userId, applicationData } = body
-
-    // Simulate application processing
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Mock application response
-    const applicationId = `APP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    
     return NextResponse.json({
       success: true,
-      data: {
-        applicationId,
-        status: "submitted",
-        message: "Application submitted successfully",
-        estimatedProcessingTime: "15-30 days",
-        nextSteps: [
-          "Document verification will be done within 7 days",
-          "Field verification if required",
-          "Final approval and benefit disbursal"
-        ]
-      },
-      timestamp: new Date().toISOString(),
+      data: response,
+      message: 'Schemes fetched successfully'
     })
+
   } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to submit application",
-        message: error instanceof Error ? error.message : "Unknown error"
-      },
-      { status: 500 }
-    )
+    console.error('Error in schemes API:', error)
+    return NextResponse.json({
+      success: false,
+      message: 'Failed to fetch schemes',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
