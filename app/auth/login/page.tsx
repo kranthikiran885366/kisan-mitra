@@ -28,6 +28,8 @@ const translations = {
     signUp: "Sign Up",
     phoneTab: "Phone",
     emailTab: "Email",
+    otpLogin: "Login with OTP",
+    passwordLogin: "Login with Password",
   },
   hi: {
     title: "वापस स्वागत है",
@@ -41,6 +43,8 @@ const translations = {
     signUp: "साइन अप करें",
     phoneTab: "फोन",
     emailTab: "ईमेल",
+    otpLogin: "OTP से लॉगिन करें",
+    passwordLogin: "पासवर्ड से लॉगिन करें",
   },
   te: {
     title: "తిరిగి స్వాగతం",
@@ -54,6 +58,8 @@ const translations = {
     signUp: "సైన్ అప్ చేయండి",
     phoneTab: "ఫోన్",
     emailTab: "ఇమెయిల్",
+    otpLogin: "OTP తో లాగిన్ చేయండి",
+    passwordLogin: "పాస్వర్డ్ తో లాగిన్ చేయండి",
   },
 }
 
@@ -66,9 +72,52 @@ export default function LoginPage() {
     email: "",
     password: "",
   })
+  const [otpMode, setOtpMode] = useState(false)
+  const [otp, setOtp] = useState("")
+  const [otpTimer, setOtpTimer] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const t = translations[language]
+
+  useEffect(() => {
+    if (otpTimer > 0) {
+      const timer = setTimeout(() => setOtpTimer(otpTimer - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [otpTimer])
+
+  const sendLoginOtp = async () => {
+    if (!formData.phone || !/^[6-9]\d{9}$/.test(formData.phone)) {
+      toast.error('Please enter a valid 10-digit mobile number')
+      return
+    }
+    
+    // For testing - simulate OTP sent
+    setOtpMode(true)
+    setOtpTimer(60)
+    toast.success('OTP sent! Use 12345 for testing')
+  }
+
+  const verifyLoginOtp = async () => {
+    if (!otp) {
+      toast.error('Please enter OTP')
+      return false
+    }
+    
+    // For testing - accept 12345 as valid OTP
+    if (otp === '12345') {
+      const mockToken = `otp_token_${Date.now()}`
+      localStorage.setItem('token', mockToken)
+      localStorage.setItem('user', JSON.stringify({ mobile: formData.phone, loginMethod: 'otp' }))
+      
+      toast.success('Login successful!')
+      router.push('/dashboard')
+      return true
+    } else {
+      toast.error('Invalid OTP. Use 12345 for testing.')
+      return false
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -240,20 +289,69 @@ export default function LoginPage() {
                 <TabsContent value="phone" className="space-y-4">
                   <div>
                     <Label htmlFor="phone">{t.phone}</Label>
-                    <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="9876543210"
-                    value={formData.phone}
-                    onChange={(e) => {
-                      // Only allow numbers and limit to 10 digits
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                      setFormData({ ...formData, phone: value });
-                    }}
-                    required
-                    pattern="[0-9]{10}"
-                    title="Please enter a valid 10-digit mobile number"
-                  />
+                    <div className="flex gap-2">
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="9876543210"
+                        value={formData.phone}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setFormData({ ...formData, phone: value });
+                        }}
+                        required
+                        pattern="[0-9]{10}"
+                        title="Please enter a valid 10-digit mobile number"
+                        disabled={otpMode}
+                      />
+                      {!otpMode && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={sendLoginOtp}
+                          disabled={isLoading}
+                        >
+                          {t.otpLogin}
+                        </Button>
+                      )}
+                    </div>
+                    {otpMode && (
+                      <div className="mt-2">
+                        <Label htmlFor="loginOtp">Enter OTP</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="loginOtp"
+                            type="text"
+                            placeholder="123456"
+                            maxLength={6}
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                            required
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={sendLoginOtp}
+                            disabled={otpTimer > 0 || isLoading}
+                          >
+                            {otpTimer > 0 ? `${otpTimer}s` : 'Resend'}
+                          </Button>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setOtpMode(false)
+                            setOtp('')
+                            setOtpTimer(0)
+                          }}
+                          className="mt-2"
+                        >
+                          {t.passwordLogin}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
@@ -294,16 +392,34 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isLoading}>
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    {t.login}
-                  </div>
-                ) : (
-                  t.login
-                )}
-              </Button>
+              {otpMode && loginType === 'phone' ? (
+                <Button 
+                  type="button" 
+                  className="w-full bg-green-600 hover:bg-green-700" 
+                  disabled={isLoading}
+                  onClick={verifyLoginOtp}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Verifying OTP...
+                    </div>
+                  ) : (
+                    'Verify OTP'
+                  )}
+                </Button>
+              ) : (
+                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isLoading}>
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      {t.login}
+                    </div>
+                  ) : (
+                    t.login
+                  )}
+                </Button>
+              )}
 
               <div className="text-center">
                 <Link href="/auth/forgot-password" className="text-sm text-green-600 hover:underline">

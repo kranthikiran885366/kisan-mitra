@@ -13,6 +13,7 @@ import {
   Users,
   Stethoscope,
   MessageCircle,
+  ShoppingCart,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,9 +30,14 @@ const translations = {
       market: "Market Rates",
       schemes: "Gov Schemes",
       crops: "Crop Advisor",
+      marketplace: "Marketplace",
+      cropScan: "Crop Scanner",
+      cropGuidance: "Crop Guidance",
       aiBot: "AI Assistant",
-      specialist: "Disease Expert",
-      community: "Farmer Groups",
+      specialist: "Consultations",
+      community: "Community",
+      messages: "Messages", 
+      forum: "Forum",
       analytics: "Farm Analytics",
     },
     getStarted: "Start Farming Smart",
@@ -50,9 +56,14 @@ const translations = {
       market: "बाजार दरें",
       schemes: "सरकारी योजनाएं",
       crops: "फसल सलाहकार",
+      marketplace: "बाज़ार",
+      cropScan: "फसल स्कैनर",
+      cropGuidance: "फसल मार्गदर्शन",
       aiBot: "AI सहायक",
-      specialist: "रोग विशेषज्ञ",
-      community: "किसान समूह",
+      specialist: "परामर्श",
+      community: "समुदाय",
+      messages: "संदेश",
+      forum: "मंच", 
       analytics: "खेत विश्लेषण",
     },
     getStarted: "स्मार्ट खेती शुरू करें",
@@ -71,9 +82,14 @@ const translations = {
       market: "మార్కెట్ రేట్లు",
       schemes: "ప్రభుత్వ పథకాలు",
       crops: "పంట సలహాదారు",
+      marketplace: "మార్కెట్ప్లేస్",
+      cropScan: "పంట స్క్యానర్",
+      cropGuidance: "పంట మార్గదర్శనం",
       aiBot: "AI సహాయకుడు",
-      specialist: "వ్యాధి నిపుణుడు",
-      community: "రైతు గ్రూపులు",
+      specialist: "సలహాలు",
+      community: "కమ్యూనిటీ",
+      messages: "సందేశాలు",
+      forum: "ఫోరమ్",
       analytics: "వ్యవసాయ విశ్లేషణ",
     },
     getStarted: "స్మార్ట్ వ్యవసాయం ప్రారంభించండి",
@@ -125,6 +141,24 @@ export default function HomePage() {
       path: "/crop-advisor"
     },
     { 
+      icon: ShoppingCart, 
+      key: "marketplace", 
+      color: "bg-gradient-to-r from-red-500 to-pink-500",
+      path: "/marketplace"
+    },
+    { 
+      icon: Stethoscope, 
+      key: "cropScan", 
+      color: "bg-gradient-to-r from-purple-500 to-indigo-500",
+      path: "/crop-scan"
+    },
+    { 
+      icon: Users, 
+      key: "cropGuidance", 
+      color: "bg-gradient-to-r from-emerald-500 to-teal-500",
+      path: "/crop-guidance"
+    },
+    { 
       icon: Bot, 
       key: "aiBot", 
       color: "bg-gradient-to-r from-pink-500 to-rose-500",
@@ -134,13 +168,25 @@ export default function HomePage() {
       icon: Stethoscope, 
       key: "specialist", 
       color: "bg-gradient-to-r from-indigo-500 to-blue-500",
-      path: "/disease-expert"
+      path: "/consultations"
     },
     { 
-      icon: Users, 
+      icon: MessageCircle, 
       key: "community", 
       color: "bg-gradient-to-r from-teal-500 to-cyan-500",
       path: "/community"
+    },
+    { 
+      icon: Users, 
+      key: "messages", 
+      color: "bg-gradient-to-r from-pink-500 to-purple-500",
+      path: "/messages"
+    },
+    { 
+      icon: MessageCircle, 
+      key: "forum", 
+      color: "bg-gradient-to-r from-indigo-500 to-purple-500",
+      path: "/forum"
     },
     { 
       icon: TrendingUp, 

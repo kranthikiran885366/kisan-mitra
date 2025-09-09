@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
-// Create axios instance with base URL and common headers
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -10,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Add request interceptor to include auth token in requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -24,86 +22,108 @@ api.interceptors.request.use(
   }
 );
 
-// Auth API
+const apiCall = async (endpoint: string, options: any = {}) => {
+  try {
+    const response = await api({
+      url: endpoint,
+      method: 'GET',
+      ...options
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`API Error (${endpoint}):`, error);
+    throw error;
+  }
+};
+
 export const authApi = {
-  // Login with email/phone and password
   login: async (credentials: { email?: string; phone?: string; password: string }) => {
-    console.log('Login request payload:', JSON.stringify(credentials, null, 2));
-    
     try {
       const response = await api.post('/auth/login', credentials);
-      console.log('Login successful, response:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('Login API error details:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        responseData: error.response?.data,
-        request: {
-          method: error.config?.method,
-          url: error.config?.url,
-          data: error.config?.data,
-          headers: error.config?.headers
-        }
-      });
-      
-      // Add more specific error messages based on the response
       if (error.response) {
         if (error.response.status === 400) {
-          error.message = error.response.data?.message || 'Invalid credentials. Please check your email/phone and password.';
+          error.message = error.response.data?.message || 'Invalid credentials';
         } else if (error.response.status === 401) {
-          error.message = 'Authentication failed. Please check your credentials and try again.';
+          error.message = 'Authentication failed';
         } else if (error.response.status >= 500) {
-          error.message = 'Server error. Please try again later.';
+          error.message = 'Server error';
         }
       }
-      
       throw error;
     }
   },
-
-  // Register a new user
-  register: async (userData: {
-    name: string;
-    mobile: string;
-    email?: string;
-    password: string;
-    state?: string;
-    district?: string;
-    village?: string;
-    role?: string;
-    landSize?: number;
-    primaryCrop?: string;
-    preferredLanguage?: string;
-  }) => {
-    console.log('Sending registration request to:', `${API_BASE_URL}/auth/register`);
-    console.log('Request payload:', JSON.stringify(userData, null, 2));
-    
-    try {
-      const response = await api.post('/auth/register', userData);
-      console.log('Registration API response:', response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error('Registration API error:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers,
-        request: error.request,
-        config: error.config
-      });
-      
-      // Re-throw the error to be handled by the caller
-      throw error;
-    }
+  register: async (userData: any) => {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
   },
-
-  // Get current user
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;
   },
+};
+
+export const weatherApi = {
+  getCurrent: (lat: number, lon: number) => apiCall(`/weather/current?lat=${lat}&lon=${lon}`),
+  getForecast: (lat: number, lon: number) => apiCall(`/weather/forecast?lat=${lat}&lon=${lon}`),
+  getAlerts: () => apiCall('/weather/alerts')
+};
+
+export const marketApi = {
+  getPrices: () => apiCall('/market/prices'),
+  getTrends: () => apiCall('/market/trends'),
+  getAnalysis: () => apiCall('/market/analysis')
+};
+
+export const marketplaceApi = {
+  sell: (data: any) => apiCall('/marketplace/sell', { method: 'POST', data }),
+  getProducts: () => apiCall('/marketplace/products'),
+  negotiate: (data: any) => apiCall('/marketplace/negotiate', { method: 'POST', data })
+};
+
+export const cropsApi = {
+  getRecommendations: (params: any) => apiCall(`/crops/recommendations?${new URLSearchParams(params)}`),
+  scanDisease: (data: any) => apiCall('/disease/detect', { method: 'POST', data }),
+  getGuidance: () => apiCall('/crops/guidance')
+};
+
+export const communityApi = {
+  getPosts: () => apiCall('/community/posts'),
+  createPost: (data: any) => apiCall('/community/posts', { method: 'POST', data }),
+  getGroups: () => apiCall('/community/groups')
+};
+
+export const expertApi = {
+  getExperts: () => apiCall('/expert'),
+  bookConsultation: (data: any) => apiCall('/expert/consultation', { method: 'POST', data }),
+  getMessages: (id: string) => apiCall(`/expert/messages?consultationId=${id}`),
+  sendMessage: (data: any) => apiCall('/expert/message', { method: 'POST', data })
+};
+
+export const schemesApi = {
+  getSchemes: () => apiCall('/schemes'),
+  getScheme: (id: string) => apiCall(`/schemes/${id}`),
+  apply: (data: any) => apiCall('/schemes/apply', { method: 'POST', data })
+};
+
+export const userApi = {
+  getProfile: () => apiCall('/user/profile'),
+  updateProfile: (data: any) => apiCall('/user/profile', { method: 'PUT', data }),
+  getSettings: () => apiCall('/user/settings')
+};
+
+export const alertsApi = {
+  getAlerts: () => apiCall('/alerts'),
+  markRead: (id: string) => apiCall(`/alerts/${id}/read`, { method: 'PUT' })
+};
+
+export const uploadApi = {
+  uploadImage: (formData: FormData) => apiCall('/upload/image', { 
+    method: 'POST', 
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
 };
 
 export default api;

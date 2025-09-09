@@ -34,6 +34,8 @@ const translations = {
     selectState: "Select State",
     selectDistrict: "Select District",
     selectCrop: "Select Primary Crop",
+    photo: "Profile Photo",
+    uploadPhoto: "Upload Photo",
   },
   hi: {
     title: "कृषि मित्र में शामिल हों",
@@ -53,6 +55,8 @@ const translations = {
     selectState: "राज्य चुनें",
     selectDistrict: "जिला चुनें",
     selectCrop: "मुख्य फसल चुनें",
+    photo: "प्रोफाइल फोटो",
+    uploadPhoto: "फोटो अपलोड करें",
   },
   te: {
     title: "కృషి మిత్రలో చేరండి",
@@ -72,6 +76,8 @@ const translations = {
     selectState: "రాష్ట్రాన్ని ఎంచుకోండి",
     selectDistrict: "జిల్లాను ఎంచుకోండి",
     selectCrop: "ప్రధాన పంటను ఎంచుకోండి",
+    photo: "ప్రొఫైల్ ఫోటో",
+    uploadPhoto: "ఫోటో అప్లోడ్ చేయండి",
   },
 }
 
@@ -104,14 +110,63 @@ export default function SignUpPage() {
     farmSize: "",
     primaryCrop: "",
     role: "farmer", // default role
+    photo: null as File | null,
   })
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const t = translations[language]
 
+  const [otpSent, setOtpSent] = useState(false)
+  const [otp, setOtp] = useState("")
+  const [otpTimer, setOtpTimer] = useState(0)
+
+  useEffect(() => {
+    if (otpTimer > 0) {
+      const timer = setTimeout(() => setOtpTimer(otpTimer - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [otpTimer])
+
+  const sendOtp = async () => {
+    if (!formData.mobile || !/^[6-9]\d{9}$/.test(formData.mobile)) {
+      toast.error('Please enter a valid 10-digit mobile number')
+      return
+    }
+    
+    // For testing - simulate OTP sent
+    setOtpSent(true)
+    setOtpTimer(60)
+    toast.success('OTP sent! Use 12345 for testing')
+  }
+
+  const verifyOtp = async () => {
+    if (!otp) {
+      toast.error('Please enter OTP')
+      return false
+    }
+    
+    // For testing - accept 12345 as valid OTP
+    if (otp === '12345') {
+      toast.success('Mobile number verified successfully!')
+      return true
+    } else {
+      toast.error('Invalid OTP. Use 12345 for testing.')
+      return false
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log('Form submission started')
+    
+    // If OTP not verified, verify first
+    if (!otpSent) {
+      await sendOtp()
+      return
+    }
+    
+    const otpVerified = await verifyOtp()
+    if (!otpVerified) return
     
     // Validate form
     const validations = [
@@ -285,8 +340,45 @@ export default function SignUpPage() {
                       value={formData.mobile}
                       onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                       required
+                      disabled={otpSent}
                     />
+                    {!otpSent && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={sendOtp}
+                        disabled={isLoading}
+                      >
+                        Send OTP
+                      </Button>
+                    )}
                   </div>
+                  {otpSent && (
+                    <div className="mt-2">
+                      <Label htmlFor="otp">Enter OTP</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="otp"
+                          type="text"
+                          placeholder="123456"
+                          maxLength={6}
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                          required
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={sendOtp}
+                          disabled={otpTimer > 0 || isLoading}
+                        >
+                          {otpTimer > 0 ? `${otpTimer}s` : 'Resend'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <div>
@@ -379,6 +471,21 @@ export default function SignUpPage() {
                   </Select>
                 </div>
               </div>
+              <div>
+                <Label htmlFor="photo">Profile Photo</Label>
+                <Input
+                  id="photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setFormData({ ...formData, photo: file })
+                    }
+                  }}
+                />
+                <p className="text-sm text-gray-500 mt-1">Upload your profile picture (optional)</p>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="password">{t.password}</Label>
@@ -440,10 +547,10 @@ export default function SignUpPage() {
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    {t.signUp}
+                    {!otpSent ? 'Sending OTP...' : 'Verifying...'}
                   </div>
                 ) : (
-                  t.signUp
+                  !otpSent ? 'Send OTP' : t.signUp
                 )}
               </Button>
               <div className="text-center text-sm text-gray-600">

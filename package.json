@@ -6,7 +6,11 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "seed:marketplace": "node server/scripts/seedMarketplace.js",
+    "seed:complete": "node server/scripts/seedAll.js",
+    "seed:weather": "node server/scripts/seedWeather.js",
+    "seed:all": "npm run seed:complete && npm run seed:weather"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",

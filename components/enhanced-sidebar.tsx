@@ -49,6 +49,7 @@ import {
   LineChart,
   BarChart,
   TrendingUpIcon,
+  ShoppingCart,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -69,6 +70,7 @@ const translations = {
     crops: "Crop Management",
     mandis: "Market Intelligence",
     schemes: "Government Schemes",
+    marketplace: "Marketplace",
     aiBot: "AI Assistant",
     specialist: "Disease Specialist",
     community: "Farmer Groups",
@@ -117,6 +119,7 @@ const translations = {
     crops: "फसल प्रबंधन",
     mandis: "बाजार बुद्धिमत्ता",
     schemes: "सरकारी योजनाएं",
+    marketplace: "बाज़ार",
     aiBot: "AI सहायक",
     specialist: "रोग विशेषज्ञ",
     community: "किसान समूह",
@@ -164,6 +167,7 @@ const translations = {
     crops: "పంట నిర్వహణ",
     mandis: "మార్కెట్ ఇంటెలిజెన్స్",
     schemes: "ప్రభుత్వ పథకాలు",
+    marketplace: "మార్కెట్ప్లేస్",
     aiBot: "AI సహాయకుడు",
     specialist: "వ్యాధి నిపుణుడు",
     community: "రైతు గ్రూపులు",
@@ -273,6 +277,14 @@ export function EnhancedSidebar({ user, language, activeTab, setActiveTab, onLog
       color: "text-purple-600",
       bgColor: "bg-purple-50",
       notifications: 3,
+    },
+    {
+      id: "marketplace",
+      icon: ShoppingCart,
+      label: t.marketplace,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      notifications: 0,
     },
     {
       id: "aiBot",

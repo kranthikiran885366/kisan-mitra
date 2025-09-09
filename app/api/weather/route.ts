@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import dbConnect from "@/lib/mongodb"
+import WeatherAlert from "@/server/models/WeatherAlert"
 
-const API_KEY = 'f8a2b9d4c6e8f1a3b5c7d9e2f4a6b8c1' // Valid WeatherAPI key
+const API_KEY = 'f8a2b9d4c6e8f1a3b5c7d9e2f4a6b8c1'
 const BASE_URL = 'https://api.weatherapi.com/v1'
 
 // Mock weather data for development
@@ -119,29 +121,148 @@ const getMockWeatherData = (location: string) => ({
 })
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const query = searchParams.get('q')
-  const days = searchParams.get('days') || '7'
-  
-  if (!query) {
-    return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 })
-  }
-
   try {
-    const apiUrl = `${BASE_URL}/forecast.json?key=${API_KEY}&q=${encodeURIComponent(query)}&days=${days}&aqi=yes&alerts=no`
-    console.log('Fetching weather data from:', apiUrl)
+    await dbConnect()
     
-    const response = await fetch(apiUrl)
+    const { searchParams } = new URL(request.url)
+    const query = searchParams.get('q')
+    const district = searchParams.get('district') || 'Guntur'
+    const state = searchParams.get('state') || 'Andhra Pradesh'
+    const crop = searchParams.get('crop')
+    const days = searchParams.get('days') || '7'
     
-    if (!response.ok) {
-      console.log('API failed, using mock data')
-      return NextResponse.json(getMockWeatherData(query))
+    if (!query && !district) {
+      return NextResponse.json({ error: 'Location parameter is required' }, { status: 400 })
     }
-    
-    const data = await response.json()
-    return NextResponse.json(data)
+
+    // Check for existing weather data
+    let weatherData = await WeatherAlert.findOne({
+      "location.district": district,
+      "location.state": state,
+      createdAt: {
+        $gte: new Date(Date.now() - 6 * 60 * 60 * 1000)
+      }
+    }).sort({ createdAt: -1 })
+
+    if (!weatherData) {
+      // Try external API first, fallback to mock data
+      let externalData
+      try {
+        const apiUrl = `${BASE_URL}/forecast.json?key=${API_KEY}&q=${encodeURIComponent(query || district)}&days=${days}&aqi=yes&alerts=no`
+        const response = await fetch(apiUrl)
+        if (response.ok) {
+          externalData = await response.json()
+        }
+      } catch (error) {
+        console.log('External API failed, using generated data')
+      }
+
+      // Use external data or generate mock data
+      const weatherInfo = externalData ? {
+        temperature: externalData.current.temp_c,
+        humidity: externalData.current.humidity,
+        rainfall: externalData.current.precip_mm,
+        windSpeed: externalData.current.wind_kph,
+        condition: externalData.current.condition.text.toLowerCase().includes('rain') ? 'rainy' : 
+                  externalData.current.condition.text.toLowerCase().includes('cloud') ? 'cloudy' : 'sunny',
+        pressure: externalData.current.pressure_mb,
+        uvIndex: externalData.current.uv
+      } : {
+        temperature: Math.round(20 + Math.random() * 15),
+        humidity: Math.round(40 + Math.random() * 40),
+        rainfall: Math.random() > 0.7 ? Math.round(Math.random() * 20) : 0,
+        windSpeed: Math.round(5 + Math.random() * 15),
+        condition: ['sunny', 'cloudy', 'rainy'][Math.floor(Math.random() * 3)],
+        pressure: Math.round(1000 + Math.random() * 50),
+        uvIndex: Math.round(Math.random() * 10)
+      }
+
+      // Generate forecast
+      const forecastData = []
+      for (let i = 0; i < parseInt(days); i++) {
+        const date = new Date()
+        date.setDate(date.getDate() + i)
+        
+        const dayData = externalData?.forecast?.forecastday?.[i]
+        forecastData.push({
+          date,
+          temperature: {
+            min: dayData?.day?.mintemp_c || (weatherInfo.temperature - 5),
+            max: dayData?.day?.maxtemp_c || (weatherInfo.temperature + 5)
+          },
+          humidity: dayData?.day?.avghumidity || (weatherInfo.humidity + (Math.random() - 0.5) * 20),
+          rainfall: dayData?.day?.totalprecip_mm || (Math.random() > 0.6 ? Math.round(Math.random() * 15) : 0),
+          condition: dayData?.day?.condition?.text?.toLowerCase().includes('rain') ? 'rainy' : 
+                    dayData?.day?.condition?.text?.toLowerCase().includes('cloud') ? 'cloudy' : 'sunny'
+        })
+      }
+
+      weatherData = new WeatherAlert({
+        location: { district, state },
+        weather: weatherInfo,
+        forecast: forecastData
+      })
+
+      await weatherData.generateCropAlerts()
+      await weatherData.calculateRisks()
+      await weatherData.save()
+    }
+
+    // Filter alerts by crop if specified
+    let filteredAlerts = weatherData.cropAlerts
+    if (crop) {
+      filteredAlerts = weatherData.cropAlerts.filter(alert => 
+        alert.cropName.toLowerCase().includes(crop.toLowerCase())
+      )
+    }
+
+    const response = {
+      location: {
+        name: `${district}, ${state}`,
+        region: state,
+        country: 'India'
+      },
+      current: {
+        temp_c: weatherData.weather.temperature,
+        condition: {
+          text: weatherData.weather.condition,
+          icon: `//cdn.weatherapi.com/weather/64x64/day/${weatherData.weather.condition === 'sunny' ? '113' : weatherData.weather.condition === 'rainy' ? '296' : '116'}.png`
+        },
+        humidity: weatherData.weather.humidity,
+        wind_kph: weatherData.weather.windSpeed,
+        precip_mm: weatherData.weather.rainfall,
+        pressure_mb: weatherData.weather.pressure,
+        uv: weatherData.weather.uvIndex
+      },
+      forecast: {
+        forecastday: weatherData.forecast.map(f => ({
+          date: f.date.toISOString().split('T')[0],
+          day: {
+            maxtemp_c: f.temperature.max,
+            mintemp_c: f.temperature.min,
+            avghumidity: f.humidity,
+            totalprecip_mm: f.rainfall,
+            condition: {
+              text: f.condition,
+              icon: `//cdn.weatherapi.com/weather/64x64/day/${f.condition === 'sunny' ? '113' : f.condition === 'rainy' ? '296' : '116'}.png`
+            }
+          }
+        }))
+      },
+      cropAlerts: filteredAlerts.map(alert => ({
+        type: alert.alertType,
+        severity: alert.severity,
+        title: `${alert.cropName} - ${alert.alertType.replace('_', ' ').toUpperCase()}`,
+        message: alert.message,
+        recommendations: alert.recommendations,
+        validUntil: alert.validUntil
+      })),
+      pestDiseaseRisk: weatherData.pestDiseaseRisk
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
-    console.log('API error, using mock data:', error)
-    return NextResponse.json(getMockWeatherData(query))
+    console.error('Weather API error:', error)
+    return NextResponse.json(getMockWeatherData(query || 'Default Location'))
   }
 }

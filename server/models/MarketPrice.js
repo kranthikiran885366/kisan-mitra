@@ -57,7 +57,7 @@ const marketPriceSchema = new mongoose.Schema(
       index: true,
     },
     arrivals: {
-      type: Number, // quantity arrived in market
+      type: Number,
       default: 0,
     },
     trend: {
@@ -98,12 +98,10 @@ const marketPriceSchema = new mongoose.Schema(
   },
 )
 
-// Compound indexes for efficient queries
 marketPriceSchema.index({ cropName: 1, date: -1 })
 marketPriceSchema.index({ "market.district": 1, "market.state": 1, date: -1 })
 marketPriceSchema.index({ cropName: 1, "market.district": 1, date: -1 })
 
-// Calculate price trend
 marketPriceSchema.statics.calculateTrend = async function (cropName, district, days = 7) {
   const endDate = new Date()
   const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000)
@@ -127,7 +125,6 @@ marketPriceSchema.statics.calculateTrend = async function (cropName, district, d
   return { direction, percentage: Math.abs(percentage).toFixed(2) }
 }
 
-// Get price history for charts
 marketPriceSchema.statics.getPriceHistory = function (cropName, district, days = 30) {
   const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 
@@ -140,12 +137,11 @@ marketPriceSchema.statics.getPriceHistory = function (cropName, district, days =
     .select("prices.modal date arrivals")
 }
 
-// Get nearby market prices
 marketPriceSchema.statics.getNearbyPrices = function (district, state, cropName = null) {
   const query = {
     "market.state": state,
     date: {
-      $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+      $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     },
   }
 
@@ -155,7 +151,6 @@ marketPriceSchema.statics.getNearbyPrices = function (district, state, cropName 
   return this.find(query).sort({ date: -1, "prices.modal": -1 }).limit(50)
 }
 
-// Get top gainers/losers
 marketPriceSchema.statics.getTopMovers = async function (type = "gainers", limit = 5) {
   const pipeline = [
     {
@@ -197,12 +192,10 @@ marketPriceSchema.statics.getTopMovers = async function (type = "gainers", limit
   return this.aggregate(pipeline)
 }
 
-// Virtual for price change
 marketPriceSchema.virtual("priceChange").get(function () {
   return this.prices.maximum - this.prices.minimum
 })
 
-// Virtual for price volatility
 marketPriceSchema.virtual("volatility").get(function () {
   const range = this.prices.maximum - this.prices.minimum
   return (range / this.prices.average) * 100

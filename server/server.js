@@ -45,7 +45,7 @@ app.use("/api/", limiter)
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://localhost:3001"],
     credentials: true,
   }),
 )
@@ -78,6 +78,7 @@ app.use("/api/auth", require("./routes/auth"))
 app.use("/api/weather", require("./routes/weather"))
 app.use("/api/crops", require("./routes/crops"))
 app.use("/api/market", require("./routes/market"))
+app.use("/api/marketplace", require("./routes/marketplace"))
 app.use("/api/schemes", require("./routes/schemes"))
 app.use("/api/ideas", require("./routes/ideas"))
 app.use("/api/user", require("./routes/user"))
@@ -90,7 +91,7 @@ app.use("/api/alerts", require("./routes/alerts"))
 app.use("/api/whatsapp", require("./routes/whatsapp"))
 app.use("/api/upload", require("./routes/upload"))
 app.use("/api/assistant", require("./routes/assistant"))
-app.use("/api/community", require("./routes/community"))
+app.use("/api/ratings", require("./routes/ratings"))
  
 
 // Health check endpoint
@@ -160,13 +161,17 @@ app.use("*", (req, res) => {
       "/api/weather",
       "/api/crops",
       "/api/market",
+      "/api/marketplace",
       "/api/schemes",
       "/api/community",
       "/api/expert",
       "/api/doctor",
       "/api/videos",
       "/api/assistant",
-      "/api/community",
+      "/api/ratings",
+      "/api/alerts",
+      "/api/ideas",
+      "/api/user",
     ],
   })
 })
