@@ -17,6 +17,10 @@ async function seedRemainingData() {
     const experts = await Expert.find().populate('user');
     const farmers = await User.find({ role: 'farmer' });
 
+    if (!experts.length || !farmers.length) {
+      throw new Error('No experts or farmers found. Please seed users and experts first.');
+    }
+
     // Clear existing data
     await Appointment.deleteMany({});
     await DiseaseDetection.deleteMany({});
@@ -27,31 +31,64 @@ async function seedRemainingData() {
 
     // Seed Appointments
     const appointments = [];
-    const appointmentTypes = ['video', 'in_person', 'phone'];
-    const appointmentStatuses = ['scheduled', 'completed', 'cancelled'];
+    const meetingTypes = ['video', 'chat', 'in_person'];
+    const statuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+    const paymentStatuses = ['pending', 'completed', 'refunded'];
+    
+    function generateAppointmentTime(availabilitySlots) {
+      const weekDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const slot = availabilitySlots[Math.floor(Math.random() * availabilitySlots.length)];
+      
+      // Get next occurrence of this weekday
+      const now = new Date();
+      const today = now.getDay();
+      const targetDay = weekDays.indexOf(slot.day);
+      let daysToAdd = (targetDay - today + 7) % 7;  // Ensure positive number
+      if (daysToAdd === 0) daysToAdd = 7;  // If same day, schedule for next week
+      
+      const appointmentDate = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+      
+      // Parse start time
+      const [hours, minutes] = slot.startTime.split(':').map(Number);
+      appointmentDate.setHours(hours, minutes, 0, 0);
+      
+      return appointmentDate;
+    }
     
     for (let i = 0; i < 20; i++) {
       const farmer = farmers[Math.floor(Math.random() * farmers.length)];
       const expert = experts[Math.floor(Math.random() * experts.length)];
-      const type = appointmentTypes[Math.floor(Math.random() * appointmentTypes.length)];
-      const status = appointmentStatuses[Math.floor(Math.random() * appointmentStatuses.length)];
-      const date = new Date(Date.now() + (Math.random() * 14 - 7) * 24 * 60 * 60 * 1000);
+      const meetingType = meetingTypes[Math.floor(Math.random() * meetingTypes.length)];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      const duration = [30, 45, 60][Math.floor(Math.random() * 3)];
+      const amount = duration * 100; // ₹100 per minute
+
+      // Get available slots
+      const availableSlots = expert.availability.filter(slot => slot.isAvailable);
+      if (!availableSlots.length) continue;
+
+      // Generate appointment time
+      const appointmentDate = generateAppointmentTime(availableSlots);
 
       const appointment = new Appointment({
-        farmer: farmer._id,
-        expert: expert.user._id,
-        date,
-        type,
+        user: farmer._id,
+        expert: expert._id,
+        dateTime: appointmentDate,
+        duration,
         status,
-        duration: 30,
-        topic: 'Crop Consultation',
-        notes: 'Discussion about current crop issues and solutions.',
-        location: status === 'in_person' ? {
-          address: 'Agricultural Extension Center',
-          district: farmer.district,
-          state: farmer.state
-        } : undefined,
-        meetingLink: type === 'video' ? 'https://meet.example.com/abc123' : undefined
+        meetingType,
+        meetingLink: meetingType === 'video' ? 'https://meet.example.com/abc123' : undefined,
+        description: 'Consultation regarding crop health and management',
+        amount,
+        paymentStatus: paymentStatuses[Math.floor(Math.random() * paymentStatuses.length)],
+        notes: [{
+          content: 'Initial consultation notes',
+          addedBy: expert.user._id,
+          isPrivate: false
+        }],
+        reminderSent: Math.random() > 0.5,
+        rating: status === 'completed' ? Math.floor(Math.random() * 5) + 1 : undefined,
+        review: status === 'completed' ? 'Very helpful consultation session' : undefined
       });
 
       await appointment.save();
@@ -62,35 +99,60 @@ async function seedRemainingData() {
 
     // Seed Disease Detections
     const diseaseDetections = [];
-    const crops = ['Rice', 'Wheat', 'Cotton', 'Tomato'];
-    const diseases = [
-      { name: 'Blast', severity: 'high', confidence: 0.92 },
-      { name: 'Blight', severity: 'medium', confidence: 0.85 },
-      { name: 'Rust', severity: 'low', confidence: 0.78 },
-      { name: 'Leaf Spot', severity: 'medium', confidence: 0.88 }
+    const cropTypes = ['Rice', 'Wheat', 'Cotton', 'Tomato'];
+    const detectionResults = [
+      {
+        name: 'Blast Disease',
+        confidence: 92,
+        severity: 'high',
+        crop: 'Rice',
+        description: 'Common fungal disease affecting rice crops',
+        symptoms: ['Leaf lesions', 'White to gray-green lesions'],
+        treatments: {
+          organic: ['Use resistant varieties', 'Crop rotation'],
+          chemical: ['Apply fungicides', 'Use copper-based sprays'],
+          cultural: ['Proper spacing', 'Field sanitation']
+        },
+        prevention: ['Use disease-free seeds', 'Maintain field hygiene'],
+        weatherImpact: 'High humidity increases disease spread'
+      },
+      {
+        name: 'Leaf Blight',
+        confidence: 85,
+        severity: 'medium',
+        crop: 'Wheat',
+        description: 'Bacterial disease affecting wheat crops',
+        symptoms: ['Yellow-brown lesions', 'Wilting leaves'],
+        treatments: {
+          organic: ['Use compost tea', 'Apply neem oil'],
+          chemical: ['Apply bactericides', 'Use copper oxychloride'],
+          cultural: ['Remove infected plants', 'Improve drainage']
+        },
+        prevention: ['Use resistant cultivars', 'Proper irrigation'],
+        weatherImpact: 'Wet conditions favor disease development'
+      }
     ];
 
     for (let i = 0; i < 30; i++) {
       const farmer = farmers[Math.floor(Math.random() * farmers.length)];
-      const crop = crops[Math.floor(Math.random() * crops.length)];
-      const disease = diseases[Math.floor(Math.random() * diseases.length)];
+      const cropType = cropTypes[Math.floor(Math.random() * cropTypes.length)];
+      const detectionResult = detectionResults[Math.floor(Math.random() * detectionResults.length)];
 
       const detection = new DiseaseDetection({
         farmer: farmer._id,
-        crop,
-        diseaseName: disease.name,
-        severity: disease.severity,
-        confidence: disease.confidence,
-        detectedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-        imageUrl: '/sample/disease-detection.jpg',
-        symptoms: ['Leaf yellowing', 'Spots on leaves', 'Wilting'],
-        recommendedActions: [
-          'Apply fungicide',
-          'Improve drainage',
-          'Monitor affected plants'
-        ],
-        status: Math.random() > 0.5 ? 'resolved' : 'pending',
-        notes: 'Early detection allows for effective treatment.'
+        imagePath: '/uploads/diseases/sample.jpg',
+        imageUrl: 'https://example.com/disease-images/sample.jpg',
+        cropType,
+        location: {
+          latitude: 17.3850 + (Math.random() - 0.5) * 2,
+          longitude: 78.4867 + (Math.random() - 0.5) * 2,
+          address: 'Sample Farm Location, Telangana'
+        },
+        detectionResult,
+        status: Math.random() > 0.3 ? 'completed' : 'processing',
+        processingTime: Math.floor(Math.random() * 5000),
+        notes: 'Sample detection notes',
+        consultationRequested: Math.random() > 0.7
       });
 
       await detection.save();
@@ -101,28 +163,31 @@ async function seedRemainingData() {
 
     // Seed Files
     const files = [];
-    const fileCategories = ['guide', 'report', 'certificate', 'document'];
-    const fileTypes = [
-      { ext: 'pdf', mime: 'application/pdf' },
-      { ext: 'doc', mime: 'application/msword' },
-      { ext: 'xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+    const filetypes = [
+      { ext: 'pdf', mime: 'application/pdf', prefix: 'doc' },
+      { ext: 'jpg', mime: 'image/jpeg', prefix: 'img' },
+      { ext: 'mp4', mime: 'video/mp4', prefix: 'vid' }
     ];
 
     for (let i = 0; i < 15; i++) {
-      const category = fileCategories[Math.floor(Math.random() * fileCategories.length)];
-      const fileType = fileTypes[Math.floor(Math.random() * fileTypes.length)];
+      const filetype = filetypes[Math.floor(Math.random() * filetypes.length)];
+      const filename = `${filetype.prefix}_${Date.now()}_${i}.${filetype.ext}`;
 
       const file = new File({
-        name: `Sample_${category}_${i + 1}.${fileType.ext}`,
-        path: `/uploads/files/${category}/${Date.now()}_${i}.${fileType.ext}`,
+        filename,
+        originalName: `original_${filename}`,
+        path: `/uploads/files/${filename}`,
         size: Math.floor(Math.random() * 5000000),
-        mimeType: fileType.mime,
-        category,
-        uploadedBy: farmers[Math.floor(Math.random() * farmers.length)]._id,
-        description: `Sample ${category} file for agricultural purposes`,
-        tags: ['agriculture', category, fileType.ext],
+        mimetype: filetype.mime,
+        extension: filetype.ext,
+        encoding: 'utf8',
+        md5: '123e4567e89b12d3a456426655440000',
+        sha256: '987f6543e21b12d3a456426655440000',
         isPublic: Math.random() > 0.3,
-        downloads: Math.floor(Math.random() * 100)
+        createdBy: farmers[Math.floor(Math.random() * farmers.length)]._id,
+        tags: ['agriculture', 'documentation'],
+        description: 'Sample agricultural document',
+        status: 'ready'
       });
 
       await file.save();
@@ -134,28 +199,58 @@ async function seedRemainingData() {
     // Seed Videos
     const videos = [];
     const videoCategories = [
-      'training',
-      'demonstration',
-      'expert_talk',
-      'success_story'
+      'crop_cultivation',
+      'pest_management',
+      'disease_control',
+      'organic_farming'
     ];
 
     for (let i = 0; i < 10; i++) {
+      const expert = experts[Math.floor(Math.random() * experts.length)];
       const category = videoCategories[Math.floor(Math.random() * videoCategories.length)];
-      
+
       const video = new Video({
-        title: `Agricultural ${category.replace('_', ' ')} video ${i + 1}`,
-        description: `Detailed ${category.replace('_', ' ')} about modern farming techniques`,
-        url: `https://example.com/videos/${category}/${i + 1}`,
-        thumbnail: `https://example.com/thumbnails/${category}/${i + 1}.jpg`,
+        title: `Agricultural Guide: ${category.replace('_', ' ')} techniques - Part ${i + 1}`,
+        description: `Comprehensive guide about ${category.replace('_', ' ')} for farmers`,
+        videoUrl: `https://example.com/videos/${category}/${i + 1}.mp4`,
+        thumbnailUrl: `https://example.com/thumbnails/${category}/${i + 1}.jpg`,
         duration: Math.floor(Math.random() * 900) + 300, // 5-20 minutes
+        fileSize: Math.floor(Math.random() * 100000000),
+        quality: ['720p', '1080p'][Math.floor(Math.random() * 2)],
         category,
-        uploadedBy: experts[Math.floor(Math.random() * experts.length)].user._id,
-        language: ['English', 'Hindi', 'Telugu'][Math.floor(Math.random() * 3)],
-        tags: ['farming', category, 'education'],
-        views: Math.floor(Math.random() * 1000),
-        likes: Math.floor(Math.random() * 100),
-        isPublic: true
+        targetAudience: ['beginner', 'intermediate', 'advanced'][Math.floor(Math.random() * 3)],
+        farmingType: ['organic', 'conventional'],
+        applicableRegions: [
+          {
+            state: 'Telangana',
+            districts: ['Hyderabad', 'Rangareddy']
+          }
+        ],
+        seasons: ['kharif', 'rabi'],
+        crops: ['Rice', 'Wheat', 'Cotton'],
+        createdBy: expert.user._id,
+        creatorType: 'agriculture_expert',
+        language: ['en', 'hi', 'te'][Math.floor(Math.random() * 3)],
+        status: 'published',
+        publishedAt: new Date(),
+        tags: ['farming', 'education', category],
+        difficulty: ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)],
+        timeRequired: '30 minutes',
+        costEstimate: {
+          min: 1000,
+          max: 5000,
+          currency: 'INR'
+        },
+        analytics: {
+          watchTime: Math.floor(Math.random() * 100000),
+          averageWatchTime: Math.floor(Math.random() * 500),
+          completionRate: Math.random() * 100,
+          deviceStats: {
+            mobile: Math.floor(Math.random() * 1000),
+            desktop: Math.floor(Math.random() * 500),
+            tablet: Math.floor(Math.random() * 200)
+          }
+        }
       });
 
       await video.save();
@@ -179,29 +274,29 @@ async function seedRemainingData() {
       console.log(`${status.padEnd(20)}: ${count}`);
     });
 
-    // Disease Detection Statistics
-    const diseaseStats = {};
+    // Disease Detection Status Distribution
+    const detectionStats = {};
     diseaseDetections.forEach(d => {
-      diseaseStats[d.diseaseName] = (diseaseStats[d.diseaseName] || 0) + 1;
+      detectionStats[d.status] = (detectionStats[d.status] || 0) + 1;
     });
 
-    console.log('\n🔬 Disease Detections by Type:');
-    Object.entries(diseaseStats).forEach(([disease, count]) => {
-      console.log(`${disease.padEnd(20)}: ${count}`);
+    console.log('\n🔬 Disease Detections by Status:');
+    Object.entries(detectionStats).forEach(([status, count]) => {
+      console.log(`${status.padEnd(20)}: ${count}`);
     });
 
-    // File Categories
+    // File Types Distribution
     const fileStats = {};
     files.forEach(f => {
-      fileStats[f.category] = (fileStats[f.category] || 0) + 1;
+      fileStats[f.extension] = (fileStats[f.extension] || 0) + 1;
     });
 
-    console.log('\n📁 Files by Category:');
-    Object.entries(fileStats).forEach(([category, count]) => {
-      console.log(`${category.padEnd(20)}: ${count}`);
+    console.log('\n📁 Files by Type:');
+    Object.entries(fileStats).forEach(([type, count]) => {
+      console.log(`${type.padEnd(20)}: ${count}`);
     });
 
-    // Video Categories
+    // Video Categories Distribution
     const videoStats = {};
     videos.forEach(v => {
       videoStats[v.category] = (videoStats[v.category] || 0) + 1;
