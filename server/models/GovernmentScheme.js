@@ -52,10 +52,8 @@ const governmentSchemeSchema = new mongoose.Schema(
   {
     // Basic Information
     name: {
-      type: String,
+      type: Object,
       required: true,
-      trim: true,
-      maxlength: 200,
     },
     shortName: {
       type: String,
@@ -63,9 +61,8 @@ const governmentSchemeSchema = new mongoose.Schema(
       maxlength: 50,
     },
     description: {
-      type: String,
+      type: Object,
       required: true,
-      maxlength: 2000,
     },
 
     // Multilingual Content

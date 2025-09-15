@@ -167,40 +167,44 @@ async function seedCommunity() {
       {
         name: 'Rajesh Kumar',
         email: 'rajesh@farmer.com',
-        mobile: '9876543210',
+        mobile: '9876543220',
         role: 'farmer',
         state: 'Andhra Pradesh',
         district: 'Guntur',
+        village: 'Amaravati',
         primaryCrop: 'Rice',
         experience: 15
       },
       {
         name: 'Dr. Priya Sharma',
         email: 'priya@expert.com',
-        mobile: '9876543211',
+        mobile: '9876543221',
         role: 'expert',
         state: 'Karnataka',
         district: 'Bangalore',
+        village: 'Whitefield',
         expertise: ['Organic Farming', 'Pest Management'],
         experience: 20
       },
       {
         name: 'Suresh Patel',
         email: 'suresh@farmer.com',
-        mobile: '9876543212',
+        mobile: '9876543222',
         role: 'farmer',
         state: 'Gujarat',
         district: 'Bharuch',
+        village: 'Ankleshwar',
         primaryCrop: 'Cotton',
         experience: 10
       },
       {
         name: 'Meera Singh',
         email: 'meera@farmer.com',
-        mobile: '9876543213',
+        mobile: '9876543223',
         role: 'farmer',
         state: 'Punjab',
         district: 'Ludhiana',
+        village: 'Raikot',
         primaryCrop: 'Wheat',
         experience: 12
       }

@@ -107,9 +107,10 @@ async function seedGovernmentSchemes() {
         hi: "किसानों को प्रत्यक्ष आय सहायता - ₹6000 प्रति वर्ष तीन किस्तों में",
         te: "రైతులకు ప్రత్యక్ష ఆదాయ మద్దతు - సంవత్సరానికి ₹6000 మూడు వాయిదాలలో",
       },
-      category: "direct-benefit-transfer",
-      launchedBy: "central",
-      targetBeneficiaries: ["small-farmers", "marginal-farmers"],
+      category: "financial_assistance",
+      level: "central",
+      coverage: "national",
+      targetBeneficiaries: ["small_farmers", "marginal_farmers"],
       financialBenefit: {
         type: "fixed-amount",
         amount: 6000,

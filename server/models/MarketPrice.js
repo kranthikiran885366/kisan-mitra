@@ -77,9 +77,9 @@ const marketPriceSchema = new mongoose.Schema(
       default: "average",
     },
     source: {
-      type: String,
-      default: "agmarknet",
-      enum: ["agmarknet", "manual", "api", "scraping"],
+  type: String,
+  default: "agmarknet",
+  enum: ["agmarknet", "manual", "api", "scraping", "seeded"],
     },
     isVerified: {
       type: Boolean,

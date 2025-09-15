@@ -151,10 +151,10 @@ const userSchema = new mongoose.Schema(
 
     // Role-based system
     role: {
-      type: String,
-      enum: ["farmer", "agri_doctor", "agriculture_expert", "admin"],
-      default: "farmer",
-      required: true,
+  type: String,
+  enum: ["farmer", "agri_doctor", "agriculture_expert", "admin", "seller", "expert"],
+  default: "farmer",
+  required: true,
     },
 
     // Professional Information (for experts and doctors)
@@ -172,6 +172,7 @@ const userSchema = new mongoose.Schema(
         type: String,
         enum: [
           "crop_diseases",
+          "crop_disease",
           "soil_management",
           "organic_farming",
           "pest_control",

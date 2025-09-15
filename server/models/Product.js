@@ -55,7 +55,7 @@ const productSchema = new mongoose.Schema(
     },
     stock: {
       quantity: { type: Number, required: true, min: 0 },
-      unit: { type: String, required: true, enum: ["kg", "gm", "ltr", "ml", "pieces", "packets"] },
+  unit: { type: String, required: true, enum: ["kg", "gm", "ltr", "ml", "pieces", "packets", "bags", "bottles", "kits"] },
       lowStockAlert: { type: Number, default: 10 },
     },
     ratings: {

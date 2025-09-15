@@ -119,7 +119,7 @@ async function seedMarketplace() {
     if (!seller) {
       seller = new User({
         name: 'Sample Seller',
-        mobile: '9876543210',
+        mobile: '9876543219', // Changed to unique mobile number
         password: 'password123',
         role: 'farmer',
         village: 'Sample Village',
